@@ -1,6 +1,6 @@
 # jupyterlab_mol_visualizer
 
-![Github Actions Status](https://github.com/osscar-org/jupyterlab-mol-visualizer/workflows/Build/badge.svg)[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/osscar-org/jupyterlab-mol-visualizer/main?urlpath=lab)
+![Github Actions Status](https://github.com/osscar-org/jupyterlab-mol-visualizer/workflows/Build/badge.svg)[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/osscar-org/jupyterlab-mol-visualizer/master?urlpath=lab)
 
 A JupyterLab launcher extension to view the molecular orbitals.
 
