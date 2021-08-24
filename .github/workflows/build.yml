@@ -94,15 +94,3 @@ jobs:
         pip install jupyterlab
         jupyter labextension list 2>&1 | grep -ie "jupyterlab-mol-visualizer.*OK"
         python -m jupyterlab.browser_check --no-chrome-test
-
-  trigger-binder-build:
-    runs-on: [ubuntu-latest]
-    steps:
-      - name: Get branch name
-        id: branch-name
-        uses: tj-actions/branch-names@v4.9
-
-      - uses: s-weigand/trigger-mybinder-build@v1
-        with:
-          target-repo: osscar-org/jupyterlab-mol-visualizer/${{ steps.branch-name.outputs.current_branch }}"
-
