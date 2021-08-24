@@ -98,7 +98,9 @@ jobs:
   trigger-binder-build:
     runs-on: [ubuntu-latest]
     steps:
+      - uses: nelonoel/branch-name@v1.0.1
+        run: echo ${BRANCH_NAME}
       - uses: s-weigand/trigger-mybinder-build@v1
         with:
-          target-repo: osscar-org/jupyterlab-mol-visualizer
+          target-repo: osscar-org/jupyterlab-mol-visualizer/${BRANCH_NAME}
 
