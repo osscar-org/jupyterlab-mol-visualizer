@@ -98,8 +98,11 @@ jobs:
   trigger-binder-build:
     runs-on: [ubuntu-latest]
     steps:
-      - uses: nelonoel/branch-name@v1.0.1
+      - name: Get branch name
+        id: branch-name
+        uses: tj-actions/branch-names@v4.9
+
       - uses: s-weigand/trigger-mybinder-build@v1
         with:
-          target-repo: osscar-org/jupyterlab-mol-visualizer/${BRANCH_NAME}
+          target-repo: osscar-org/jupyterlab-mol-visualizer/${{ steps.branch-name.outputs.current_branch }}"
 
