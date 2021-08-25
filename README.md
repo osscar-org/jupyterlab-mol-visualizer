@@ -4,7 +4,7 @@
 
 A JupyterLab launcher extension to view the molecular orbitals.
 
-
+![demo](./binder/demo.gif)
 
 ## Requirements
 
