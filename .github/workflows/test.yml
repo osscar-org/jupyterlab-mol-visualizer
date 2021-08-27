@@ -23,8 +23,8 @@ jobs:
         architecture: 'x64'
     - name: Install dependencies
       run: | 
-        pip install -r --upgrade pip
-        pip install -r --upgrade jupyterlab
+        pip install --upgrade pip
+        pip install --upgrade jupyterlab
         pip install --upgrade pytest
         pip install --upgrade selenium
         pip install -e .
