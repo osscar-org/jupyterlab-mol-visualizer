@@ -24,18 +24,12 @@ class TestTest01():
     self.driver.set_window_size(1280, 720)
     time.sleep(5)
 
-    self.driver.find_element(By.CSS_SELECTOR, ".jp-icon-brand2 > path").click()
-    element = self.driver.find_element(By.ID, "jp-main-dock-panel")
+    self.driver.find_element(By.CSS_SELECTOR, ".jp-LauncherCard:nth-child(4) svg").click()
+    element = self.driver.find_element(By.CSS_SELECTOR, ".jp-mod-selected > .jp-DirListing-itemText > span")
     actions = ActionChains(self.driver)
     actions.double_click(element).perform()
-    self.driver.find_element(By.CSS_SELECTOR, ".jp-mod-selected > .jp-DirListing-itemText").click()
-    self.driver.find_element(By.CSS_SELECTOR, ".jp-mod-selected > .jp-DirListing-itemText").click()
-    element = self.driver.find_element(By.CSS_SELECTOR, ".jp-mod-selected > .jp-DirListing-itemText")
-    actions = ActionChains(self.driver)
-    actions.double_click(element).perform()
-    self.driver.find_element(By.CSS_SELECTOR, ".jp-mod-selected > .jp-DirListing-itemText").click()
     self.driver.find_element(By.CSS_SELECTOR, ".MuiGrid-root:nth-child(1) > .MuiPaper-root > .MuiButtonBase-root .MuiSvgIcon-root").click()
-    self.driver.find_element(By.CSS_SELECTOR, ".MuiGrid-root:nth-child(2) > .MuiPaper-root > .MuiButtonBase-root path").click()
+    self.driver.find_element(By.CSS_SELECTOR, ".MuiGrid-root:nth-child(2) > .MuiPaper-root > .MuiButtonBase-root").click()
 
     self.driver.save_screenshot("jupyterlab-extension.png")
 
