@@ -34,7 +34,12 @@ class TestTest01():
     actions = ActionChains(self.driver)
     actions.double_click(element).perform()
 
-    self.driver.save_screenshot("jupyterlab-extensionr3.png")
+    self.driver.save_screenshot("jupyterlab-extension3.png")
+
+    self.driver.find_elements_by_class_name("makeStyles-iconButton-10")[0].click()
+    self.driver.find_elements_by_class_name("makeStyles-iconButton-10")[1].click()
+
+    self.driver.save_screenshot("jupyterlab-extension4.png")
 
 test = TestTest01()
 test.setup_method('Chrome')
