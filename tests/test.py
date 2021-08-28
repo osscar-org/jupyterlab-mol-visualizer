@@ -26,7 +26,7 @@ class TestTest01():
 
     self.driver.find_element(By.CSS_SELECTOR, ".jp-LauncherCard:nth-child(4) svg").click()
 
-    element = self.find_elements_by_class_name("jp-DirListing-itemText")[0]
+    element = self.driver.find_elements_by_class_name("jp-DirListing-itemText")[0]
     actions = ActionChains(self.driver)
     actions.double_click(element).perform()
 
