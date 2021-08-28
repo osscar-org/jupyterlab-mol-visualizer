@@ -26,7 +26,7 @@ class TestTest01():
 
     self.driver.save_screenshot("jupyterlab-extension1.png")
 
-    self.driver.find_element(By.CSS_SELECTOR, ".jp-LauncherCard:nth-child(4) svg").click()
+    self.driver.find_element(By.CSS_SELECTOR, ".jp-LauncherCard:nth-child(5) svg").click()
 
     self.driver.save_screenshot("jupyterlab-extension2.png")
 
