@@ -24,9 +24,11 @@ class TestTest01():
     self.driver.set_window_size(1280, 720)
     time.sleep(5)
 
-    self.driver.find_element(By.CSS_SELECTOR, ".jp-LauncherCard:nth-child(5) svg").click()
+    self.driver.save_screenshot("jupyterlab-extension1.png")
 
-    self.driver.save_screenshot("jupyterlab-extension.png")
+    self.driver.find_element(By.CSS_SELECTOR, ".jp-LauncherCard:nth-child(4) svg").click()
+
+    self.driver.save_screenshot("jupyterlab-extension2.png")
 
 test = TestTest01()
 test.setup_method('Chrome')
