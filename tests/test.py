@@ -30,6 +30,12 @@ class TestTest01():
 
     self.driver.save_screenshot("jupyterlab-extension2.png")
 
+    element = self.driver.find_element_by_xpath("//span[text()='binder']")
+    actions = ActionChains(self.driver)
+    actions.double_click(element).perform()
+
+    self.driver.save_screenshot("jupyterlab-extensionr3.png")
+
 test = TestTest01()
 test.setup_method('Chrome')
 test.test_test01()
