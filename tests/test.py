@@ -30,9 +30,6 @@ class TestTest01():
     actions = ActionChains(self.driver)
     actions.double_click(element).perform()
 
-    self.driver.find_elements_by_class_name("makeStyles-iconButton-10")[0].click()
-    self.driver.find_elements_by_class_name("makeStyles-iconButton-10")[1].click()
-
     self.driver.save_screenshot("jupyterlab-extension.png")
 
 test = TestTest01()
