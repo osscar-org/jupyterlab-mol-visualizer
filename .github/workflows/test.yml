@@ -27,6 +27,8 @@ jobs:
         pip install --upgrade jupyterlab
         pip install --upgrade pytest
         pip install --upgrade selenium
+        yarn install
+        yarn run build
         pip install -e .
 
     - name: Run the jupyter lab server
