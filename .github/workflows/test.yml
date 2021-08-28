@@ -30,6 +30,7 @@ jobs:
         yarn install
         yarn run build
         pip install -e .
+        jupyter labextension develop . --overwrite
 
     - name: Run the jupyter lab server
       run: |
