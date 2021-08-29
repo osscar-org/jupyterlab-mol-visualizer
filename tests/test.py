@@ -40,6 +40,7 @@ class TestTest01():
     for el in elements:
         el.click()
 
+    time.sleep(5)
     self.driver.save_screenshot("jupyterlab-extension4.png")
 
 test = TestTest01()
