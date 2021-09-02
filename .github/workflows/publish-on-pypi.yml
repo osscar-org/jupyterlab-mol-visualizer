@@ -8,7 +8,7 @@ on:
 jobs:
   publish_pypi:
     runs-on: ubuntu-latest
-    if: github.repository == 'osscar-org/jupyterlab-cube' && startsWith(github.ref, 'refs/tags/v')
+    if: github.repository == 'osscar-org/jupyterlab-mol-visualizer' && startsWith(github.ref, 'refs/tags/v')
 
     steps:
     - name: Checkout repository
