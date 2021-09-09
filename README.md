@@ -1,6 +1,12 @@
-# jupyterlab_mol_visualizer
+# jupyterlab-mol-visualizer
 
-![Github Actions Status](https://github.com/osscar-org/jupyterlab-mol-visualizer/workflows/Build/badge.svg)[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/osscar-org/jupyterlab-mol-visualizer/master?urlpath=lab)
+![Github Actions Status](https://github.com/osscar-org/jupyterlab-mol-visualizer/workflows/Build/badge.svg)
+[![PyPI version](https://badge.fury.io/py/jupyterlab-mol-visualizer.svg)](https://badge.fury.io/py/jupyterlab-mol-visualizer)
+[![npm version](https://badge.fury.io/js/jupyterlab-mol-visualizer.svg)](https://badge.fury.io/js/jupyterlab-mol-visualizer)
+
+## Try it with Binder
+
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/osscar-org/jupyterlab-mol-visualizer/master?urlpath=lab)
 
 A JupyterLab launcher extension to view the molecular orbitals.
 
@@ -15,7 +21,12 @@ A JupyterLab launcher extension to view the molecular orbitals.
 To install the extension, execute:
 
 ```bash
-pip install jupyterlab_mol_visualizer
+pip install jupyterlab-mol-visualizer
+```
+or
+
+```bash
+jupyter labextension install jupyterlab-mol-visualizer
 ```
 
 ## Uninstall
@@ -23,9 +34,8 @@ pip install jupyterlab_mol_visualizer
 To remove the extension, execute:
 
 ```bash
-pip uninstall jupyterlab_mol_visualizer
+pip uninstall jupyterlab-mol-visualizer
 ```
-
 
 ## Contributing
 
@@ -74,3 +84,10 @@ pip uninstall jupyterlab_mol_visualizer
 In development mode, you will also need to remove the symlink created by `jupyter labextension develop`
 command. To find its location, you can run `jupyter labextension list` to figure out where the `labextensions`
 folder is located. Then you can remove the symlink named `jupyterlab-mol-visualizer` within that folder.
+
+
+# Acknowledgements
+
+We acknowledge support from the EPFL Open Science Fund via the [OSSCAR](http://www.osscar.org) project.
+
+<img src='http://www.osscar.org/wp-content/uploads/2019/03/OSSCAR-logo.png' width='230'>
