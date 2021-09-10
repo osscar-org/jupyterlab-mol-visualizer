@@ -1,4 +1,4 @@
-# jupyterlab-mol-visualizer
+# **jupyterlab-mol-visualizer**: A JupyterLab Launcher to Visualize Molecular Orbital and Structure
 
 ![Github Actions Status](https://github.com/osscar-org/jupyterlab-mol-visualizer/workflows/Build/badge.svg)
 [![PyPI version](https://badge.fury.io/py/jupyterlab-mol-visualizer.svg)](https://badge.fury.io/py/jupyterlab-mol-visualizer)
