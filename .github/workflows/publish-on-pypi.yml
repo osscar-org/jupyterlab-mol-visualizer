@@ -33,7 +33,7 @@ jobs:
     - name: Install the node
       uses: actions/setup-node@v2
       with:
-        node-version: '17.x'
+        node-version: '16.x'
     - run: npm install
 
     - name: Create new tag
