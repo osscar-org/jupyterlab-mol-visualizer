@@ -10,7 +10,7 @@
 
 A JupyterLab launcher extension to view the molecular orbitals.
 
-![demo](./binder/demo.gif)
+![demo](https://raw.githubusercontent.com/osscar-org/jupyterlab-mol-visualizer/develop/binder/demo.gif)
 
 ## Requirements
 
@@ -85,9 +85,8 @@ In development mode, you will also need to remove the symlink created by `jupyte
 command. To find its location, you can run `jupyter labextension list` to figure out where the `labextensions`
 folder is located. Then you can remove the symlink named `jupyterlab-mol-visualizer` within that folder.
 
-
-# Acknowledgements
+## Acknowledgements
 
 We acknowledge support from the EPFL Open Science Fund via the [OSSCAR](http://www.osscar.org) project.
 
-<img src='http://www.osscar.org/wp-content/uploads/2019/03/OSSCAR-logo.png' width='230'>
+<img src='https://www.osscar.org/_images/logos.png' width='700'>
