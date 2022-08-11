@@ -37,9 +37,6 @@ jobs:
         jupyter lab &
 
     - uses: nanasess/setup-chromedriver@master
-      with:
-        # Optional: do not specify to match Chrome's version
-        chromedriver-version: '103.0.5060.134'
     - run: |
         export DISPLAY=:99
         chromedriver --url-base=/wd/hub &
