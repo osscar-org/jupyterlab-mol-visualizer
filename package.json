@@ -55,7 +55,7 @@
     "@material-ui/icons": "4.11.3",
     "@material-ui/lab": "4.0.0-alpha.61",
     "@osscar/ngl": "2.0.0-dev.38",
-    "underscore": "1.13.4"
+    "underscore": "1.13.6"
   },
   "devDependencies": {
     "@jupyterlab/builder": "^3.4.2",
