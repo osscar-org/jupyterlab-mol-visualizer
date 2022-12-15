@@ -1,6 +1,6 @@
 {
   "name": "jupyterlab-mol-visualizer",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "description": "A JupyterLab launcher extension to view the molecular orbitals.",
   "keywords": [
     "jupyter",
