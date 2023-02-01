@@ -22,6 +22,7 @@ class TestTest01():
   
   def test_test01(self):
     a = subprocess.check_output(['jupyter server list'], shell=True)
+    print("The jupyter server:", a)
     url = a.split(b'\n')[1].decode("utf-8").split(' ')[0]
     self.driver.get(url)
     self.driver.set_window_size(1280, 720)
