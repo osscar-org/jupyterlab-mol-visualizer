@@ -3,6 +3,7 @@ import pytest
 import time
 import json
 import sys
+import subprocess
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
@@ -20,7 +21,9 @@ class TestTest01():
     self.driver.quit()
   
   def test_test01(self):
-    self.driver.get(sys.argv[1])
+    a = subprocess.check_output(['jupyter server list'], shell=True)
+    url = a.split(b'\n')[1].decode("utf-8").split(' ')[0]
+    self.driver.get(url)
     self.driver.set_window_size(1280, 720)
     time.sleep(5)
 
