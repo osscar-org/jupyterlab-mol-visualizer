@@ -34,7 +34,6 @@ jobs:
 
     - name: Run the jupyter lab server
       run: |
-        jupyter lab &
         sleep 6
         url=$(jupyter server list | tail -1 | awk '{print $1}')
         echo "jupyterlab url is:" $url
@@ -44,6 +43,7 @@ jobs:
         export DISPLAY=:99
         chromedriver --url-base=/wd/hub &
         sudo Xvfb -ac :99 -screen 0 1280x1024x24 > /dev/null 2>&1 & # optional
+        jupyter lab &
         python3 $GITHUB_WORKSPACE/tests/test.py $url
 
     - uses: actions/upload-artifact@v2
