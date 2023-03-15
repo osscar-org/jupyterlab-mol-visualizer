@@ -1,0 +1,47 @@
+name: Run tests
+
+on:
+  push:
+    branches: '*'
+  pull_request:
+    branches: '*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Install node
+      uses: actions/setup-node@v1
+      with:
+       node-version: '18.x'
+    - name: Install Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.9'
+        architecture: 'x64'
+    - name: Install dependencies
+      run: | 
+        pip install --upgrade pip
+        pip install --upgrade jupyterlab
+        pip install --upgrade pytest
+        pip install --upgrade selenium
+        yarn install
+        yarn run build
+        pip install -e .
+
+    - uses: nanasess/setup-chromedriver@master
+    - run: |
+        export DISPLAY=:99
+        chromedriver --url-base=/wd/hub &
+        sudo Xvfb -ac :99 -screen 0 1280x1024x24 > /dev/null 2>&1 & # optional
+        jupyter lab --NotebookApp.token='' --NotebookApp.password='' &
+        sleep 10
+        python3 $GITHUB_WORKSPACE/tests/test.py
+
+    - uses: actions/upload-artifact@v2
+      with:
+        name: extension-screenshot
+        path: './*.png'
+

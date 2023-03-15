@@ -1,0 +1,101 @@
+name: Publish on PyPI
+
+on:
+  release:
+    types:
+      - published
+
+jobs:
+  publish_pypi:
+    runs-on: ubuntu-latest
+    if: github.repository == 'osscar-org/jupyterlab-mol-visualizer' && startsWith(github.ref, 'refs/tags/v')
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.9
+
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -U setuptools
+        pip install -U invoke
+        pip install -U jupyter-packaging
+        pip install -U --upgrade jupyterlab
+
+    - name: Update version
+      run: invoke update-version --version="${GITHUB_REF#refs/tags/}"
+
+    - name: Install the node
+      uses: actions/setup-node@v2
+      with:
+        node-version: '18.x'
+    - run: npm install
+
+    - name: Create new tag
+      run: |
+        git config --local user.email "dev@materialscloud.org"
+        git config --local user.name "OSSCAR Team"
+
+        git commit -m "Release ${GITHUB_REF#refs/tags/}" -a
+
+        TAG_MSG=.github/static/release_tag_msg.txt
+        sed -i "s|TAG_NAME|${GITHUB_REF#refs/tags/}|g" "${TAG_MSG}"
+
+        git tag -af -F "${TAG_MSG}" ${GITHUB_REF#refs/tags/}
+
+    - name: Push release commit and new tag
+      uses: ad-m/github-push-action@master
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        force: true
+        tags: true
+        branch: develop
+
+    - name: Build source distribution
+      run: |
+        jlpm
+        jlpm run build
+        python ./setup.py sdist bdist_wheel
+
+    - name: Publish package to PyPI
+      uses: pypa/gh-action-pypi-publish@master
+      with:
+        user: __token__
+        password: ${{ secrets.PYPI_PASSWORD }}
+
+  publish_npm:
+    needs: publish_pypi
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      # Setup .npmrc file to publish to npm
+
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -U setuptools
+          pip install -U invoke
+          pip install -U jupyter-packaging
+          pip install -U --upgrade jupyterlab
+
+      - name: Update version
+        run: invoke update-version --version="${GITHUB_REF#refs/tags/}"
+
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '18.x'
+          registry-url: 'https://registry.npmjs.org'
+      - run: yarn
+      - run: yarn publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
