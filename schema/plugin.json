@@ -1,0 +1,8 @@
+{
+  "jupyter.lab.shortcuts": [],
+  "title": "jupyterlab_mol_visualizer",
+  "description": "jupyterlab_mol_visualizer settings.",
+  "type": "object",
+  "properties": {},
+  "additionalProperties": false
+}

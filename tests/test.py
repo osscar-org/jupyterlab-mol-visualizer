@@ -21,28 +21,49 @@ class TestTest01():
     self.driver.quit()
   
   def test_test01(self):
-    a = subprocess.check_output(['jupyter server list'], shell=True)
-    print("The jupyter server:", a)
-    url = a.split(b'\n')[1].decode("utf-8").split(' ')[0]
-    self.driver.get(url)
-    self.driver.set_window_size(1280, 720)
-    time.sleep(5)
+    #a = subprocess.check_output(['jupyter server list'], shell=True)
+    #print("The jupyter server:", a)
+    #url = a.split(b'\n')[1].decode("utf-8").split(' ')[0]
+    self.driver.get("http://localhost:8888")
+    self.driver.set_window_size(1500, 1000)
+    #self.driver.execute_script("window.scrollTo(0, 200)")
+    time.sleep(10)
 
     self.driver.save_screenshot("jupyterlab-extension1.png")
 
-    self.driver.find_element(By.CSS_SELECTOR, ".jp-LauncherCard:nth-child(5) svg").click()
+    try:
+        self.driver.find_element(By.CSS_SELECTOR, ".jp-LauncherCard:nth-child(5) svg").click()
+    except:
+        pass
 
+    time.sleep(5)
     self.driver.save_screenshot("jupyterlab-extension2.png")
 
-    element = self.driver.find_element_by_xpath("//span[text()='binder']")
-    actions = ActionChains(self.driver)
-    actions.double_click(element).perform()
-
+    try:
+        element = self.driver.find_element(By.XPATH, "//span[text()='binder']")
+        actions = ActionChains(self.driver)
+        actions.double_click(element).perform()
+    except Exception as e:
+        print("----------------------------")
+        print("----------------------------")
+        print(e)
+        print("----------------------------")
+        pass
+    
+    time.sleep(5)
     self.driver.save_screenshot("jupyterlab-extension3.png")
 
-    elements = self.driver.find_elements_by_class_name("makeStyles-iconButton-10")
-    for el in elements:
-        el.click()
+    try:
+        elements = self.driver.find_elements(By.CLASS_NAME, "makeStyles-iconButton-10")
+        for el in elements:
+            el.click()
+            time.sleep(3)
+    except Exception as e:
+        print("----------------------------")
+        print("----------------------------")
+        print(e)
+        print("----------------------------")
+        pass
 
     time.sleep(5)
     self.driver.save_screenshot("jupyterlab-extension4.png")

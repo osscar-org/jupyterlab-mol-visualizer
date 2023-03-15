@@ -5,6 +5,7 @@ import { createTheme, ThemeProvider } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
+import Typography from '@material-ui/core/Typography';
 import useMediaQuery from '@material-ui/core/useMediaQuery';
 
 interface INglProps {
@@ -35,20 +36,20 @@ export default function VerticalSlider(Props: INglProps) {
 
   const marks2 = [
     {
-      value: -0.04,
-      label: '-0.04'
-    },
-    {
-      value: -0.02,
-      label: '-0.02'
-    },
-    {
       value: 0,
       label: '0'
     },
     {
+      value: 0.01,
+      label: '0.01'
+    },
+    {
       value: 0.02,
       label: '0.02'
+    },
+    {
+      value: 0.03,
+      label: '0.03'
     },
     {
       value: 0.04,
@@ -108,16 +109,20 @@ export default function VerticalSlider(Props: INglProps) {
                 id={Props.uuid}
                 style={{
                   width: '600px',
-                  height: '350px',
+                  height: '400px',
                   backgroundColor: 'black'
                 }}
               ></Box>
             </Grid>
             <Grid item sm={1}>
+              <Typography id="vertical-slider" gutterBottom>
+                Transp.
+              </Typography>
               <Slider
+                style={{ height: '350px' }}
                 orientation="vertical"
                 getAriaValueText={valuetext}
-                valueLabelDisplay="auto"
+                valueLabelDisplay="on"
                 defaultValue={30}
                 aria-labelledby="vertical-slider"
                 min={0}
@@ -128,14 +133,18 @@ export default function VerticalSlider(Props: INglProps) {
               />
             </Grid>
             <Grid item sm={1}>
+              <Typography id="vertical-slider" gutterBottom>
+                Isovalue
+              </Typography>
               <Slider
+                style={{ height: '350px' }}
                 orientation="vertical"
-                defaultValue={[0.01, -0.01]}
+                defaultValue={0.01}
                 aria-labelledby="vertical-slider"
                 getAriaValueText={valuetext}
                 valueLabelDisplay="on"
                 marks={marks2}
-                min={-0.04}
+                min={0}
                 max={0.04}
                 step={0.001}
                 onChange={Props.changeHandler2}

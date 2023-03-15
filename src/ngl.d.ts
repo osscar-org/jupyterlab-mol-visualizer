@@ -1,5 +1,5 @@
 declare var ngl: any;
 
-declare module "@osscar/ngl" {
-    export = ngl;
+declare module 'ngl' {
+  export = ngl;
 }

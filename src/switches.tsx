@@ -3,7 +3,6 @@ import FormGroup from '@material-ui/core/FormGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Switch from '@material-ui/core/Switch';
 import { makeStyles } from '@material-ui/core/styles';
-import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
 
 interface IToggleProps {
@@ -40,7 +39,9 @@ export default function SwitchLabels(Props: IToggleProps) {
   const [state, setState] = React.useState({
     checkedA: false,
     checkedB: true,
-    checkedC: true
+    checkedC: true,
+    checkedS: true,
+    checkedI: true
   });
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -57,40 +58,57 @@ export default function SwitchLabels(Props: IToggleProps) {
     }
   };
 
-  const handleClick = (): void => {
+  const handleClick1 = (): void => {
     Props.bclick1();
     setState({
       checkedA: state.checkedA,
+      checkedB: state.checkedB,
+      checkedC: state.checkedC,
+      checkedS: !state.checkedS,
+      checkedI: state.checkedI
+    });
+  };
+
+  const handleClick2 = (): void => {
+    Props.bclick2();
+    setState({
+      checkedA: state.checkedA,
       checkedB: !state.checkedB,
-      checkedC: !state.checkedC
+      checkedC: !state.checkedC,
+      checkedS: state.checkedS,
+      checkedI: !state.checkedI
     });
   };
 
   return (
     <div>
-      <Grid container spacing={3} justify="center">
+      <Grid container spacing={3} justifyContent="center">
         <Grid item sm={3}>
-          <Button
-            style={{ height: '20px' }}
-            color="secondary"
-            variant="contained"
-            onClick={Props.bclick2}
-          >
-            Toggle structure
-          </Button>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={state.checkedS}
+                onChange={handleClick1}
+                name="checkedS"
+              />
+            }
+            label="Show/hide structure"
+          />
         </Grid>
         <Grid item sm={3}>
-          <Button
-            style={{ height: '20px' }}
-            color="primary"
-            variant="contained"
-            onClick={handleClick}
-          >
-            Toggle surface
-          </Button>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={state.checkedI}
+                onChange={handleClick2}
+                name="checkedI"
+              />
+            }
+            label="Show/hide isosurface"
+          />
         </Grid>
       </Grid>
-      <Grid container justify="center">
+      <Grid container justifyContent="center">
         <FormGroup className={classes.formGroup} row>
           <FormControlLabel
             control={
@@ -100,7 +118,7 @@ export default function SwitchLabels(Props: IToggleProps) {
                 name="checkedA"
               />
             }
-            label="Spin"
+            label="Rotating"
           />
           <FormControlLabel
             control={
@@ -111,7 +129,7 @@ export default function SwitchLabels(Props: IToggleProps) {
                 color="primary"
               />
             }
-            label="Alpha"
+            label="Spin Up↑"
           />
           <FormControlLabel
             control={
@@ -122,7 +140,7 @@ export default function SwitchLabels(Props: IToggleProps) {
                 color="secondary"
               />
             }
-            label="Beta"
+            label="Spin Down↓"
           />
         </FormGroup>
       </Grid>

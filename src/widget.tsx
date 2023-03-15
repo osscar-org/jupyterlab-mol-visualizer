@@ -2,7 +2,7 @@ import { ReactWidget } from '@jupyterlab/apputils';
 
 import React from 'react';
 
-import * as NGL from '@osscar/ngl';
+import * as NGL from 'ngl';
 
 import * as _ from 'underscore';
 
@@ -14,6 +14,7 @@ import SwitchLabels from './switches';
 import Inputs from './inputs';
 import Grid from '@material-ui/core/Grid';
 import { toArray, map } from '@lumino/algorithm';
+import Typography from '@material-ui/core/Typography';
 
 /**
  * A Counter Lumino Widget that wraps a CounterComponent.
@@ -189,12 +190,12 @@ export class CounterWidget extends ReactWidget {
     const func3 = (): void => this.toggleVisibility('surface_2');
 
     const bfunc1 = (): void => {
-      this.toggleVisibility('surface_1');
-      this.toggleVisibility('surface_2');
+      this.toggleVisibility('structure1');
     };
 
     const bfunc2 = (): void => {
-      this.toggleVisibility('structure1');
+      this.toggleVisibility('surface_1');
+      this.toggleVisibility('surface_2');
     };
 
     return (
@@ -212,14 +213,19 @@ export class CounterWidget extends ReactWidget {
             event: React.ChangeEvent<unknown>,
             val: number | number[]
           ): void => {
-            const value = val as number[];
-            this.updateIsolevel(value[0], 'surface_1');
-            this.updateIsolevel(value[1], 'surface_2');
+            const value = val as number;
+            this.updateIsolevel(value, 'surface_1');
+            this.updateIsolevel(-value, 'surface_2');
           }}
         />
 
-        <Grid container spacing={3} justify="center">
-          <Grid item sm={4}>
+        <Typography variant="h6" align="center">
+          Please select structure and Gaussian cube files from current directory
+          to visualize.
+        </Typography>
+
+        <Grid container spacing={3} justifyContent="center">
+          <Grid item sm={3}>
             <Inputs
               getFiles={this.getFileList}
               types={['sdf', 'cif']}
@@ -229,7 +235,7 @@ export class CounterWidget extends ReactWidget {
               inputHandler={this.addStructure}
             ></Inputs>
           </Grid>
-          <Grid item sm={4}>
+          <Grid item sm={3}>
             <Inputs
               getFiles={this.getFileList}
               types={['cube']}

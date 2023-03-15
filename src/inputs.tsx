@@ -56,32 +56,36 @@ export default function Inputs(Props: IInputPros) {
   });
 
   return (
-    <Paper component="form" className={classes.root}>
-      <Autocomplete
-        value={value}
-        onChange={(event, newValue) => {
-          setValue(newValue as string);
-        }}
-        inputValue={inputValue}
-        onInputChange={(event, newInputValue) => {
-          setInputValue(newInputValue);
-        }}
-        id="controllable-states-demo"
-        options={files}
-        style={{ width: 300 }}
-        renderInput={params => (
-          <TextField {...params} label={Props.label} variant="outlined" />
-        )}
-      />
-      <Divider className={classes.divider} orientation="vertical" />
-      <IconButton
-        color="primary"
-        className={classes.iconButton}
-        aria-label="directions"
-        onClick={handerClick}
-      >
-        <SearchIcon />
-      </IconButton>
-    </Paper>
+    <div>
+      <Paper component="form" className={classes.root}>
+        <Autocomplete
+          color="primary"
+          value={value}
+          onChange={(event, newValue) => {
+            setValue(newValue as string);
+          }}
+          inputValue={inputValue}
+          onInputChange={(event, newInputValue) => {
+            setInputValue(newInputValue);
+          }}
+          id="controllable-states-demo"
+          options={files}
+          style={{ width: 300, height: 50 }}
+          renderInput={params => (
+            <TextField {...params} label={Props.label} variant="outlined" />
+          )}
+        />
+        <Divider className={classes.divider} orientation="vertical" />
+        <IconButton
+          color="primary"
+          style={{ height: 50 }}
+          className={classes.iconButton}
+          aria-label="directions"
+          onClick={handerClick}
+        >
+          <SearchIcon />
+        </IconButton>
+      </Paper>
+    </div>
   );
 }
