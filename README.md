@@ -14,7 +14,7 @@ A JupyterLab launcher extension to view the molecular orbitals.
 
 ## Requirements
 
-* JupyterLab >= 3.0
+- JupyterLab >= 3.0
 
 ## Install
 
@@ -23,6 +23,7 @@ To install the extension, execute:
 ```bash
 pip install jupyterlab-mol-visualizer
 ```
+
 or
 
 ```bash
