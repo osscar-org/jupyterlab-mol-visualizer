@@ -12,10 +12,10 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: Set up Python 3.9
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
         python-version: 3.9
 
@@ -31,7 +31,7 @@ jobs:
       run: invoke update-version --version="${GITHUB_REF#refs/tags/}"
 
     - name: Install the node
-      uses: actions/setup-node@v2
+      uses: actions/setup-node@v3
       with:
         node-version: '18.x'
     - run: npm install
@@ -72,11 +72,11 @@ jobs:
     needs: publish_pypi
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       # Setup .npmrc file to publish to npm
 
       - name: Set up Python 3.9
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: 3.9
 
@@ -91,7 +91,7 @@ jobs:
       - name: Update version
         run: invoke update-version --version="${GITHUB_REF#refs/tags/}"
 
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v3
         with:
           node-version: '18.x'
           registry-url: 'https://registry.npmjs.org'
