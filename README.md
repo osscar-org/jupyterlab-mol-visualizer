@@ -6,7 +6,7 @@
 
 ## Try it with Binder
 
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/osscar-org/jupyterlab-mol-visualizer/master?urlpath=lab)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/osscar-org/jupyterlab-mol-visualizer/main?urlpath=lab)
 
 A JupyterLab launcher extension to view the molecular orbitals.
 
