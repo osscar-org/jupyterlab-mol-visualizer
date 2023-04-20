@@ -70,7 +70,7 @@
     "@material-ui/icons": "4.11.3",
     "@material-ui/lab": "4.0.0-alpha.61",
     "@playwright/test": "^1.31.2",
-    "@types/jest": "^26.0.10",
+    "@types/jest": "^29.5.1",
     "@types/underscore": "^1.11.4",
     "@typescript-eslint/eslint-plugin": "^5.54.1",
     "@typescript-eslint/parser": "^5.54.1",
