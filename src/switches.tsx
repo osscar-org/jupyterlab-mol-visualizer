@@ -129,7 +129,7 @@ export default function SwitchLabels(Props: IToggleProps) {
                 color="primary"
               />
             }
-            label="Spin Up↑"
+            label="Sign +"
           />
           <FormControlLabel
             control={
@@ -140,7 +140,7 @@ export default function SwitchLabels(Props: IToggleProps) {
                 color="secondary"
               />
             }
-            label="Spin Down↓"
+            label="Sign -"
           />
         </FormGroup>
       </Grid>
