@@ -118,7 +118,7 @@ export default function SwitchLabels(Props: IToggleProps) {
                 name="checkedA"
               />
             }
-            label="Rotating"
+            label="Auto-rotate"
           />
           <FormControlLabel
             control={
