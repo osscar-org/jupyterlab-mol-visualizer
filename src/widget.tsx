@@ -80,7 +80,7 @@ export class CounterWidget extends ReactWidget {
   visualizer() {
     this.updateDatasource();
 
-    this.stage = new NGL.Stage(this.uuid, { backgroundColor: 'black' });
+    this.stage = new NGL.Stage(this.uuid, { backgroundColor: 'white' });
 
     window.addEventListener(
       'resize',
@@ -219,10 +219,6 @@ export class CounterWidget extends ReactWidget {
           }}
         />
 
-        <Typography variant="h6" align="center">
-          Please select structure and Gaussian cube files from current directory
-          to visualize.
-        </Typography>
 
         <Grid container spacing={3} justifyContent="center">
           <Grid item sm={3}>
@@ -254,6 +250,11 @@ export class CounterWidget extends ReactWidget {
           bclick1={bfunc1}
           bclick2={bfunc2}
         />
+
+        <Typography variant="h6" align="center">
+          Please select structure and Gaussian cube files from current directory
+          to visualize.
+        </Typography>
       </div>
     );
   }

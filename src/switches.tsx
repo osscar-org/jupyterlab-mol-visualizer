@@ -129,7 +129,7 @@ export default function SwitchLabels(Props: IToggleProps) {
                 color="primary"
               />
             }
-            label="Sign +"
+            label="Positive isovalue"
           />
           <FormControlLabel
             control={
@@ -140,7 +140,7 @@ export default function SwitchLabels(Props: IToggleProps) {
                 color="secondary"
               />
             }
-            label="Sign -"
+            label="Negative isovalue"
           />
         </FormGroup>
       </Grid>
