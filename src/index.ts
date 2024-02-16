@@ -11,7 +11,7 @@ import { reactIcon } from '@jupyterlab/ui-components';
 
 import { CounterWidget } from './widget';
 
-import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
+import { IDefaultFileBrowser } from '@jupyterlab/filebrowser';
 
 /**
  * The command IDs used by the react-widget plugin.
@@ -26,11 +26,11 @@ namespace CommandIDs {
 const extension: JupyterFrontEndPlugin<void> = {
   id: 'react-widget',
   autoStart: true,
-  optional: [ILauncher, IFileBrowserFactory],
+  optional: [ILauncher, IDefaultFileBrowser],
   activate: (
     app: JupyterFrontEnd,
     launcher: ILauncher,
-    browserFactory: IFileBrowserFactory
+    browserFactory: IDefaultFileBrowser
   ) => {
     const { commands } = app;
 
