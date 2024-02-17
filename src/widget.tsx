@@ -12,9 +12,9 @@ import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 import VerticalSlider from './sliders';
 import SwitchLabels from './switches';
 import Inputs from './inputs';
-import Grid from '@material-ui/core/Grid';
+import Grid from '@mui/material/Grid';
 import { toArray, map } from '@lumino/algorithm';
-import Typography from '@material-ui/core/Typography';
+import Typography from '@mui/material/Typography';
 
 /**
  * A Counter Lumino Widget that wraps a CounterComponent.
@@ -203,14 +203,14 @@ export class CounterWidget extends ReactWidget {
         <VerticalSlider
           uuid={this.uuid}
           changeHandler1={(
-            event: React.ChangeEvent<unknown>,
+            event: Event,
             val: number | number[]
           ): void => {
             const value = (val as number) / 100.0;
             this.updateIsosurface(value);
           }}
           changeHandler2={(
-            event: React.ChangeEvent<unknown>,
+            event: Event,
             val: number | number[]
           ): void => {
             const value = val as number;

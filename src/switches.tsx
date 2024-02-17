@@ -1,9 +1,40 @@
 import React from 'react';
-import FormGroup from '@material-ui/core/FormGroup';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Switch from '@material-ui/core/Switch';
-import { makeStyles } from '@material-ui/core/styles';
-import Grid from '@material-ui/core/Grid';
+import { styled } from '@mui/system';
+import FormGroup from '@mui/material/FormGroup';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Switch from '@mui/material/Switch';
+import Grid from '@mui/material/Grid';
+
+const PREFIX = 'switches';
+
+const classes = {
+  container: `${PREFIX}-container`,
+  textField: `${PREFIX}-textField`,
+  formGroup: `${PREFIX}-formGroup`
+};
+
+const Root = styled('div')( ({ theme }) => ({
+  [`& .${classes.container}`]: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    height: '100%',
+    width: '100%',
+    alignItems: 'center'
+  },
+
+  [`& .${classes.textField}`]: {
+    marginLeft: theme.spacing(1),
+    marginRight: theme.spacing(1),
+    width: 200
+  },
+
+  [`& .${classes.formGroup}`]: {
+    alignItems: 'center'
+  }
+}));
 
 interface IToggleProps {
   clickHandler1: () => void;
@@ -14,28 +45,6 @@ interface IToggleProps {
 }
 
 export default function SwitchLabels(Props: IToggleProps) {
-  const useStyles = makeStyles(theme => ({
-    container: {
-      display: 'flex',
-      flexWrap: 'wrap',
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      height: '100%',
-      width: '100%',
-      alignItems: 'center'
-    },
-    textField: {
-      marginLeft: theme.spacing(1),
-      marginRight: theme.spacing(1),
-      width: 200
-    },
-    formGroup: {
-      alignItems: 'center'
-    }
-  }));
-  const classes = useStyles();
-
   const [state, setState] = React.useState({
     checkedA: false,
     checkedB: true,
@@ -81,7 +90,7 @@ export default function SwitchLabels(Props: IToggleProps) {
   };
 
   return (
-    <div>
+    <Root>
       <Grid container spacing={3} justifyContent="center">
         <Grid item sm={3}>
           <FormControlLabel
@@ -144,6 +153,6 @@ export default function SwitchLabels(Props: IToggleProps) {
           />
         </FormGroup>
       </Grid>
-    </div>
+    </Root>
   );
 }

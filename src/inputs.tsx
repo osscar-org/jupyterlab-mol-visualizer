@@ -1,12 +1,45 @@
 import React from 'react';
-import { makeStyles } from '@material-ui/core/styles';
-import Paper from '@material-ui/core/Paper';
-import Divider from '@material-ui/core/Divider';
-import IconButton from '@material-ui/core/IconButton';
-import SearchIcon from '@material-ui/icons/Search';
-import Autocomplete from '@material-ui/lab/Autocomplete';
-import TextField from '@material-ui/core/TextField';
+import { styled } from '@mui/system';
+import Paper from '@mui/material/Paper';
+import Divider from '@mui/material/Divider';
+import IconButton from '@mui/material/IconButton';
+import SearchIcon from '@mui/icons-material/Search';
+import Autocomplete from '@mui/material/Autocomplete';
+import TextField from '@mui/material/TextField';
 import { IDefaultFileBrowser } from '@jupyterlab/filebrowser';
+
+const PREFIX = 'inputs';
+
+const classes = {
+  root: `${PREFIX}-root`,
+  input: `${PREFIX}-input`,
+  iconButton: `${PREFIX}-iconButton`,
+  divider: `${PREFIX}-divider`
+};
+
+const Root = styled('div')(({ theme }) => ({
+  [`& .${classes.root}`]: {
+    padding: '2px 4px',
+    display: 'flex',
+    alignItems: 'center',
+    width: 250,
+    height: 30
+  },
+
+  [`& .${classes.input}`]: {
+    marginLeft: theme.spacing(1),
+    flex: 1
+  },
+
+  [`& .${classes.iconButton}`]: {
+    padding: 10
+  },
+
+  [`& .${classes.divider}`]: {
+    height: 28,
+    margin: 4
+  }
+}));
 
 interface IInputPros {
   inputHandler: (e: string) => void;
@@ -17,29 +50,7 @@ interface IInputPros {
   types: string[];
 }
 
-const useStyles = makeStyles(theme => ({
-  root: {
-    padding: '2px 4px',
-    display: 'flex',
-    alignItems: 'center',
-    width: 250,
-    height: 30
-  },
-  input: {
-    marginLeft: theme.spacing(1),
-    flex: 1
-  },
-  iconButton: {
-    padding: 10
-  },
-  divider: {
-    height: 28,
-    margin: 4
-  }
-}));
-
 export default function Inputs(Props: IInputPros) {
-  const classes = useStyles();
   const [value, setValue] = React.useState(Props.options[0]);
   const [inputValue, setInputValue] = React.useState('');
   const [files, setFiles] = React.useState(Props.options);
@@ -56,7 +67,7 @@ export default function Inputs(Props: IInputPros) {
   });
 
   return (
-    <div>
+    <Root>
       <Paper component="form" className={classes.root}>
         <Autocomplete
           color="primary"
@@ -82,10 +93,10 @@ export default function Inputs(Props: IInputPros) {
           className={classes.iconButton}
           aria-label="directions"
           onClick={handerClick}
-        >
+          size="large">
           <SearchIcon />
         </IconButton>
       </Paper>
-    </div>
+    </Root>
   );
 }
