@@ -14,7 +14,7 @@ A JupyterLab launcher extension to view the molecular orbitals.
 
 ## Requirements
 
-- JupyterLab >= 3.0
+- JupyterLab >= 4.0
 
 ## Install
 
