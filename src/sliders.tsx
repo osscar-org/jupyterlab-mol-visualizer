@@ -1,35 +1,44 @@
 import React from 'react';
-import { makeStyles } from '@material-ui/core/styles';
-import Slider from '@material-ui/core/Slider';
-import { createTheme, ThemeProvider } from '@material-ui/core/styles';
-import CssBaseline from '@material-ui/core/CssBaseline';
-import Box from '@material-ui/core/Box';
-import Grid from '@material-ui/core/Grid';
-import Typography from '@material-ui/core/Typography';
-import useMediaQuery from '@material-ui/core/useMediaQuery';
+import { styled, createTheme, ThemeProvider } from '@mui/system';
+import Slider from '@mui/material/Slider';
+
+import CssBaseline from '@mui/material/CssBaseline';
+import Box from '@mui/material/Box';
+import Grid from '@mui/material/Grid';
+import Typography from '@mui/material/Typography';
+import useMediaQuery from '@mui/material/useMediaQuery';
+
+
+const PREFIX = 'sliders';
+
+const classes = {
+  root: `${PREFIX}-root`
+};
+
+const StyledThemeProvider = styled(ThemeProvider)({
+  [`& .${classes.root}`]: {
+    flexGrow: 1,
+    marginTop: '40px',
+    width: '900px',
+    margin: '0 auto'
+  }
+});
 
 interface INglProps {
   uuid: string;
   changeHandler1: (
-    event: React.ChangeEvent<unknown>,
-    val: number | number[]
+    event: Event,
+    val: number | number[],
+    activeThumb: number
   ) => void;
   changeHandler2: (
-    event: React.ChangeEvent<unknown>,
-    val: number | number[]
+    event: Event,
+    val: number | number[],
+    activeThumb: number
   ) => void;
 }
 
 export default function VerticalSlider(Props: INglProps) {
-  const useStyles = makeStyles({
-    root: {
-      flexGrow: 1,
-      marginTop: '40px',
-      width: '900px',
-      margin: '0 auto'
-    }
-  });
-
   function valuetext(value: number) {
     return `${value}°C`;
   }
@@ -84,26 +93,24 @@ export default function VerticalSlider(Props: INglProps) {
     }
   ];
 
-  const classes = useStyles();
-
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
 
   const theme = React.useMemo(
     () =>
       createTheme({
         palette: {
-          type: prefersDarkMode ? 'dark' : 'light'
+          mode: prefersDarkMode ? 'dark' : 'light'
         }
       }),
     [prefersDarkMode]
   );
 
   return (
-    <ThemeProvider theme={theme}>
+    <StyledThemeProvider theme={theme}>
       <CssBaseline />
       <React.Fragment>
         <div className={classes.root}>
-          <Grid container spacing={3} justify="center">
+          <Grid container spacing={3} justifyContent="center">
             <Grid item sm={8}>
               <Box
                 id={Props.uuid}
@@ -154,6 +161,6 @@ export default function VerticalSlider(Props: INglProps) {
           </Grid>
         </div>
       </React.Fragment>
-    </ThemeProvider>
+    </StyledThemeProvider>
   );
 }

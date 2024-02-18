@@ -6,15 +6,15 @@ import * as NGL from 'ngl';
 
 import * as _ from 'underscore';
 
-import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
+import { IDefaultFileBrowser } from '@jupyterlab/filebrowser';
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 
 import VerticalSlider from './sliders';
 import SwitchLabels from './switches';
 import Inputs from './inputs';
-import Grid from '@material-ui/core/Grid';
+import Grid from '@mui/material/Grid';
 import { toArray, map } from '@lumino/algorithm';
-import Typography from '@material-ui/core/Typography';
+import Typography from '@mui/material/Typography';
 
 /**
  * A Counter Lumino Widget that wraps a CounterComponent.
@@ -27,9 +27,9 @@ export class CounterWidget extends ReactWidget {
   stage: any;
   uuid: string;
   currentDirectory: string;
-  browserFactory: IFileBrowserFactory;
+  browserFactory: IDefaultFileBrowser;
 
-  constructor(browserFactory: IFileBrowserFactory) {
+  constructor(browserFactory: IDefaultFileBrowser) {
     super();
     this.addClass('jp-ReactWidget');
     this.uuid = _.uniqueId('ngl_');
@@ -37,7 +37,7 @@ export class CounterWidget extends ReactWidget {
     this.browserFactory = browserFactory;
     this.currentDirectory = URLExt.join(
       PageConfig.getBaseUrl() + '/files',
-      this.browserFactory?.defaultBrowser.model.path + '/'
+      this.browserFactory?.model.path + '/'
     );
 
     window.requestAnimationFrame(() => {
@@ -54,12 +54,12 @@ export class CounterWidget extends ReactWidget {
   getCurrentDirectory() {
     this.currentDirectory = URLExt.join(
       PageConfig.getBaseUrl() + '/files',
-      this.browserFactory?.defaultBrowser.model.path + '/'
+      this.browserFactory?.model.path + '/'
     );
   }
 
   getFileList(types: string[]): string[] {
-    const a = toArray(this.browserFactory?.defaultBrowser.model.items());
+    const a = toArray(this.browserFactory?.model.items());
     const b = a.filter(
       item =>
         item.type === 'file' &&
@@ -203,14 +203,14 @@ export class CounterWidget extends ReactWidget {
         <VerticalSlider
           uuid={this.uuid}
           changeHandler1={(
-            event: React.ChangeEvent<unknown>,
+            event: Event,
             val: number | number[]
           ): void => {
             const value = (val as number) / 100.0;
             this.updateIsosurface(value);
           }}
           changeHandler2={(
-            event: React.ChangeEvent<unknown>,
+            event: Event,
             val: number | number[]
           ): void => {
             const value = val as number;

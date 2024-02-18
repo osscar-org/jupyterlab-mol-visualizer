@@ -1,45 +1,56 @@
 import React from 'react';
-import { makeStyles } from '@material-ui/core/styles';
-import Paper from '@material-ui/core/Paper';
-import Divider from '@material-ui/core/Divider';
-import IconButton from '@material-ui/core/IconButton';
-import SearchIcon from '@material-ui/icons/Search';
-import Autocomplete from '@material-ui/lab/Autocomplete';
-import TextField from '@material-ui/core/TextField';
-import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
+import { styled } from '@mui/system';
+import Paper from '@mui/material/Paper';
+import Divider from '@mui/material/Divider';
+import IconButton from '@mui/material/IconButton';
+import SearchIcon from '@mui/icons-material/Search';
+import Autocomplete from '@mui/material/Autocomplete';
+import TextField from '@mui/material/TextField';
+import { IDefaultFileBrowser } from '@jupyterlab/filebrowser';
 
-interface IInputPros {
-  inputHandler: (e: string) => void;
-  options: string[];
-  label: string;
-  factory: IFileBrowserFactory;
-  getFiles: (types: string[]) => string[];
-  types: string[];
-}
+const PREFIX = 'inputs';
 
-const useStyles = makeStyles(theme => ({
-  root: {
+const classes = {
+  root: `${PREFIX}-root`,
+  input: `${PREFIX}-input`,
+  iconButton: `${PREFIX}-iconButton`,
+  divider: `${PREFIX}-divider`
+};
+
+const Root = styled('div')(({ theme }) => ({
+  [`& .${classes.root}`]: {
     padding: '2px 4px',
     display: 'flex',
     alignItems: 'center',
     width: 250,
     height: 30
   },
-  input: {
+
+  [`& .${classes.input}`]: {
     marginLeft: theme.spacing(1),
     flex: 1
   },
-  iconButton: {
+
+  [`& .${classes.iconButton}`]: {
     padding: 10
   },
-  divider: {
+
+  [`& .${classes.divider}`]: {
     height: 28,
     margin: 4
   }
 }));
 
+interface IInputPros {
+  inputHandler: (e: string) => void;
+  options: string[];
+  label: string;
+  factory: IDefaultFileBrowser;
+  getFiles: (types: string[]) => string[];
+  types: string[];
+}
+
 export default function Inputs(Props: IInputPros) {
-  const classes = useStyles();
   const [value, setValue] = React.useState(Props.options[0]);
   const [inputValue, setInputValue] = React.useState('');
   const [files, setFiles] = React.useState(Props.options);
@@ -48,7 +59,7 @@ export default function Inputs(Props: IInputPros) {
     Props.inputHandler(value);
   };
 
-  Props.factory.defaultBrowser.model.pathChanged.connect((value: any) => {
+  Props.factory.model.pathChanged.connect((value: any) => {
     console.log('The path is changed: OK');
     const f = Props.getFiles(Props.types);
     setFiles(f);
@@ -56,7 +67,7 @@ export default function Inputs(Props: IInputPros) {
   });
 
   return (
-    <div>
+    <Root>
       <Paper component="form" className={classes.root}>
         <Autocomplete
           color="primary"
@@ -82,10 +93,10 @@ export default function Inputs(Props: IInputPros) {
           className={classes.iconButton}
           aria-label="directions"
           onClick={handerClick}
-        >
+          size="large">
           <SearchIcon />
         </IconButton>
       </Paper>
-    </div>
+    </Root>
   );
 }
