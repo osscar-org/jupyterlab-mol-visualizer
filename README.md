@@ -1,6 +1,6 @@
 # jupyterlab_mol_visualizer
 
-[![Github Actions Status](https://github.com/dou-du/jupyterlab-mol-visualizer/workflows/Build/badge.svg)](https://github.com/dou-du/jupyterlab-mol-visualizer/actions/workflows/build.yml)
+[![Build](https://github.com/osscar-org/jupyterlab-mol-visualizer/actions/workflows/build.yml/badge.svg)](https://github.com/osscar-org/jupyterlab-mol-visualizer/actions/workflows/build.yml)
 
 A JupyterLab launcher extension to view the molecular orbitals (MOs).
 [NGL](https://github.com/nglviewer/ngl) JavaScript package was employed to visulizer the MOs.
