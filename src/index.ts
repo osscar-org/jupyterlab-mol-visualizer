@@ -3,15 +3,15 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
-import { MainAreaWidget } from '@jupyterlab/apputils';
+import { MainAreaWidget, IThemeManager } from '@jupyterlab/apputils';
 
 import { ILauncher } from '@jupyterlab/launcher';
 
-import { reactIcon } from '@jupyterlab/ui-components';
-
 import { CounterWidget } from './widget';
 
-import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
+import { IDefaultFileBrowser } from '@jupyterlab/filebrowser';
+
+import { molIcon } from './icons';
 
 /**
  * The command IDs used by the react-widget plugin.
@@ -23,25 +23,37 @@ namespace CommandIDs {
 /**
  * Initialization data for the react-widget extension.
  */
-const extension: JupyterFrontEndPlugin<void> = {
-  id: 'react-widget',
+const plugin: JupyterFrontEndPlugin<void> = {
+  id: 'jupyterlab_mol_visualizer:plugin',
   autoStart: true,
-  optional: [ILauncher, IFileBrowserFactory],
+  optional: [ILauncher, IDefaultFileBrowser, IThemeManager],
   activate: (
     app: JupyterFrontEnd,
     launcher: ILauncher,
-    browserFactory: IFileBrowserFactory
+    browserFactory: IDefaultFileBrowser,
+    themeManager: IThemeManager
   ) => {
     const { commands } = app;
 
     const command = CommandIDs.create;
     commands.addCommand(command, {
       caption: 'Create a new React Widget',
-      label: 'MOL Visualizer',
-      icon: args => reactIcon,
+      label: 'MOs Visualizer',
+      icon: molIcon,
       execute: () => {
-        const content = new CounterWidget(browserFactory);
+        let theme: string = 'dark'
+        if (themeManager.theme?.toLowerCase().includes('light')) { theme = 'light'; }
+        else { theme = 'dark'; };
+
+        const content = new CounterWidget(browserFactory, theme);
         const widget = new MainAreaWidget<CounterWidget>({ content });
+
+        // Watch for theme changes
+        themeManager.themeChanged.connect((_, args) => {
+          const newTheme = args.newValue;
+          console.log(`Theme changed to: ${newTheme}`);
+          // Add your custom logic here
+        });
         widget.title.label = 'MOL Visualizer';
         app.shell.add(widget, 'main');
       }
@@ -55,4 +67,4 @@ const extension: JupyterFrontEndPlugin<void> = {
   }
 };
 
-export default extension;
+export default plugin;

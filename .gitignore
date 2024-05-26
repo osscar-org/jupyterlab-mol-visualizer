@@ -120,6 +120,6 @@ dmypy.json
 
 # OSX files
 .DS_Store
-/test-results/
-/playwright-report/
-/playwright/.cache/
+
+# Yarn cache
+.yarn/

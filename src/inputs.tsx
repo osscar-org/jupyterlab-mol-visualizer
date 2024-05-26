@@ -6,13 +6,13 @@ import IconButton from '@material-ui/core/IconButton';
 import SearchIcon from '@material-ui/icons/Search';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import TextField from '@material-ui/core/TextField';
-import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
+import { IDefaultFileBrowser } from '@jupyterlab/filebrowser';
 
 interface IInputPros {
   inputHandler: (e: string) => void;
   options: string[];
   label: string;
-  factory: IFileBrowserFactory;
+  factory: IDefaultFileBrowser;
   getFiles: (types: string[]) => string[];
   types: string[];
 }
@@ -48,7 +48,7 @@ export default function Inputs(Props: IInputPros) {
     Props.inputHandler(value);
   };
 
-  Props.factory.defaultBrowser.model.pathChanged.connect((value: any) => {
+  Props.factory.model.pathChanged.connect((value: any) => {
     console.log('The path is changed: OK');
     const f = Props.getFiles(Props.types);
     setFiles(f);

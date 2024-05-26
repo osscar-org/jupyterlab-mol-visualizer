@@ -6,10 +6,11 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
-import useMediaQuery from '@material-ui/core/useMediaQuery';
+// import useMediaQuery from '@material-ui/core/useMediaQuery';
 
 interface INglProps {
   uuid: string;
+  theme: string;
   changeHandler1: (
     event: React.ChangeEvent<unknown>,
     val: number | number[]
@@ -86,7 +87,8 @@ export default function VerticalSlider(Props: INglProps) {
 
   const classes = useStyles();
 
-  const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
+  // const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
+  const prefersDarkMode = Props.theme === 'dark' ? true:false;
 
   const theme = React.useMemo(
     () =>

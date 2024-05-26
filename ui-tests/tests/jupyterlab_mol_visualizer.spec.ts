@@ -16,8 +16,6 @@ test('should emit an activation console message', async ({ page }) => {
   await page.goto();
 
   expect(
-    logs.filter(
-      s => s === 'JupyterLab extension jupyterlab_mol_visualizer is activated!'
-    )
+    logs.filter(s => s === 'JupyterLab extension jupyterlab_mol_visualizer is activated!')
   ).toHaveLength(1);
 });
