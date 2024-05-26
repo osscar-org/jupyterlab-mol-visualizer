@@ -34,6 +34,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
     themeManager: IThemeManager
   ) => {
     const { commands } = app;
+    console.log('JupyterLab extension jupyterlab_mol_visualizer is activated!');
 
     const command = CommandIDs.create;
     commands.addCommand(command, {
@@ -59,10 +60,6 @@ const plugin: JupyterFrontEndPlugin<void> = {
         });
         widget.title.label = 'MOL Visualizer';
         app.shell.add(widget, 'main');
-
-        console.log(
-          'JupyterLab extension jupyterlab_mol_visualizer is activated!'
-        );
       }
     });
 
