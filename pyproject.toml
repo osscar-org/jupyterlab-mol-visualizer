@@ -5,13 +5,6 @@ build-backend = "hatchling.build"
 [project]
 name = "jupyterlab_mol_visualizer"
 readme = "README.md"
-keywords = [
-    'jupyter',
-    'jupyterlab',
-    'anywidget',
-    'osscar',
-    'extension',
-]
 license = { file = "LICENSE" }
 requires-python = ">=3.8"
 classifiers = [
