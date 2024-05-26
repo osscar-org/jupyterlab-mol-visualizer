@@ -51,7 +51,9 @@ const plugin: JupyterFrontEndPlugin<void> = {
         const content = new CounterWidget(browserFactory, theme);
         const widget = new MainAreaWidget<CounterWidget>({ content });
 
-        console.log('JupyterLab extension jupyterlab_mol_visualizer is activated!');
+        console.log(
+          'JupyterLab extension jupyterlab_mol_visualizer is activated!'
+        );
 
         // Watch for theme changes
         themeManager.themeChanged.connect((_, args) => {
