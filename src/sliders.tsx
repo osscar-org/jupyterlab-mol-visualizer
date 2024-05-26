@@ -88,7 +88,7 @@ export default function VerticalSlider(Props: INglProps) {
   const classes = useStyles();
 
   // const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
-  const prefersDarkMode = Props.theme === 'dark' ? true:false;
+  const prefersDarkMode = Props.theme === 'dark' ? true : false;
 
   const theme = React.useMemo(
     () =>

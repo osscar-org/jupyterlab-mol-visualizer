@@ -222,7 +222,6 @@ export class CounterWidget extends ReactWidget {
           }}
         />
 
-
         <Grid container spacing={3} justifyContent="center">
           <Grid item sm={3}>
             <Inputs

@@ -41,9 +41,12 @@ const plugin: JupyterFrontEndPlugin<void> = {
       label: 'MOs Visualizer',
       icon: molIcon,
       execute: () => {
-        let theme: string = 'dark'
-        if (themeManager.theme?.toLowerCase().includes('light')) { theme = 'light'; }
-        else { theme = 'dark'; };
+        let theme: string = 'dark';
+        if (themeManager.theme?.toLowerCase().includes('light')) {
+          theme = 'light';
+        } else {
+          theme = 'dark';
+        }
 
         const content = new CounterWidget(browserFactory, theme);
         const widget = new MainAreaWidget<CounterWidget>({ content });
