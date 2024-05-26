@@ -10,7 +10,7 @@ The icon of the extension is from [SVG Repo](https://www.svgrepo.com/svg/231591/
 
 ## Try it with Binder
 
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/dou-du/jupyterlab-mol-visualizer/main?urlpath=lab)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/osscar-org/jupyterlab-mol-visualizer/main?urlpath=lab)
 
 ## Requirements
 
