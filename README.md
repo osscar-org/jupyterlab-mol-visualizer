@@ -1,4 +1,4 @@
-# jupyterlab_mol_visualizer
+# jupyterlab-mol-visualizer
 
 [![Build](https://github.com/osscar-org/jupyterlab-mol-visualizer/actions/workflows/build.yml/badge.svg)](https://github.com/osscar-org/jupyterlab-mol-visualizer/actions/workflows/build.yml)
 
