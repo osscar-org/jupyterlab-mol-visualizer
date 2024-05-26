@@ -108,4 +108,4 @@ See [RELEASE](RELEASE.md)
 
 We acknowledge support from the EPFL Open Science Fund via the [OSSCAR](http://www.osscar.org) project.
 
-<img src='https://www.osscar.org/_images/logos.png' width='700'>
+<img src='https://www.osscar.org/_images/logos.png' width='900'>
