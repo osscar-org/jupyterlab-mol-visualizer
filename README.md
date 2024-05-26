@@ -1,4 +1,4 @@
-# jupyterlab-mol-visualizer
+# `jupyterlab-mol-visualizer`: A JupyterLab Extension to Visualize Molecular Orbitals
 
 [![Build](https://github.com/osscar-org/jupyterlab-mol-visualizer/actions/workflows/build.yml/badge.svg)](https://github.com/osscar-org/jupyterlab-mol-visualizer/actions/workflows/build.yml)
 
