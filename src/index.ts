@@ -41,7 +41,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
       label: 'MOs Visualizer',
       icon: molIcon,
       execute: () => {
-        let theme: string = 'dark';
+        let theme = 'dark';
         if (themeManager.theme?.toLowerCase().includes('light')) {
           theme = 'light';
         } else {
