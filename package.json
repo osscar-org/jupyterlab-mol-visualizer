@@ -8,9 +8,9 @@
     "jupyterlab-extension",
     "osscar"
   ],
-  "homepage": "https://github.com/dou-du/jupyterlab-mol-visualizer",
+  "homepage": "https://github.com/osscar-org/jupyterlab-mol-visualizer",
   "bugs": {
-    "url": "https://github.com/dou-du/jupyterlab-mol-visualizer/issues"
+    "url": "https://github.com/osscar-org/jupyterlab-mol-visualizer/issues"
   },
   "license": "BSD-3-Clause",
   "author": {
@@ -26,7 +26,7 @@
   "style": "style/index.css",
   "repository": {
     "type": "git",
-    "url": "https://github.com/dou-du/jupyterlab-mol-visualizer.git"
+    "url": "https://github.com/osscar-org/jupyterlab-mol-visualizer.git"
   },
   "workspaces": [
     "ui-tests"
