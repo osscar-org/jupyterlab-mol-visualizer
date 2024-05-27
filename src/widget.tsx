@@ -82,7 +82,11 @@ export class CounterWidget extends ReactWidget {
   visualizer() {
     this.updateDatasource();
 
-    this.stage = new NGL.Stage(this.uuid, { backgroundColor: 'white' });
+    if (this.theme === 'light') {
+      this.stage = new NGL.Stage(this.uuid, { backgroundColor: 'white' });
+    } else {
+      this.stage = new NGL.Stage(this.uuid, { backgroundColor: 'black' });
+    }
 
     window.addEventListener(
       'resize',
