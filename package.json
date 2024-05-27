@@ -5,7 +5,8 @@
   "keywords": [
     "jupyter",
     "jupyterlab",
-    "jupyterlab-extension"
+    "jupyterlab-extension",
+    "osscar"
   ],
   "homepage": "https://github.com/dou-du/jupyterlab-mol-visualizer",
   "bugs": {
