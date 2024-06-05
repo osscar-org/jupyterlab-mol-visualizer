@@ -29,8 +29,7 @@
     "url": "https://github.com/osscar-org/jupyterlab-mol-visualizer.git"
   },
   "workspaces": [
-    "ui-tests",
-    ".jupyter_releaser_checkout"
+    "ui-tests"
   ],
   "scripts": {
     "build": "jlpm build:lib && jlpm build:labextension:dev",
