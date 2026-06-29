@@ -1,7 +1,5 @@
 import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import Paper from '@material-ui/core/Paper';
-import Divider from '@material-ui/core/Divider';
 import IconButton from '@material-ui/core/IconButton';
 import SearchIcon from '@material-ui/icons/Search';
 import Autocomplete from '@material-ui/lab/Autocomplete';
@@ -19,22 +17,14 @@ interface IInputPros {
 
 const useStyles = makeStyles(theme => ({
   root: {
-    padding: '2px 4px',
     display: 'flex',
     alignItems: 'center',
-    width: 250,
-    height: 30
-  },
-  input: {
-    marginLeft: theme.spacing(1),
-    flex: 1
+    gap: '4px'
   },
   iconButton: {
-    padding: 10
-  },
-  divider: {
-    height: 28,
-    margin: 4
+    padding: 8,
+    height: 40,
+    width: 40
   }
 }));
 
@@ -56,36 +46,39 @@ export default function Inputs(Props: IInputPros) {
   });
 
   return (
-    <div>
-      <Paper component="form" className={classes.root}>
-        <Autocomplete
-          color="primary"
-          value={value}
-          onChange={(event, newValue) => {
-            setValue(newValue as string);
-          }}
-          inputValue={inputValue}
-          onInputChange={(event, newInputValue) => {
-            setInputValue(newInputValue);
-          }}
-          id="controllable-states-demo"
-          options={files}
-          style={{ width: 300, height: 50 }}
-          renderInput={params => (
-            <TextField {...params} label={Props.label} variant="outlined" />
-          )}
-        />
-        <Divider className={classes.divider} orientation="vertical" />
-        <IconButton
-          color="primary"
-          style={{ height: 50 }}
-          className={classes.iconButton}
-          aria-label="directions"
-          onClick={handerClick}
-        >
-          <SearchIcon />
-        </IconButton>
-      </Paper>
+    <div className={classes.root}>
+      <Autocomplete
+        color="primary"
+        value={value}
+        onChange={(event, newValue) => {
+          setValue(newValue as string);
+        }}
+        inputValue={inputValue}
+        onInputChange={(event, newInputValue) => {
+          setInputValue(newInputValue);
+        }}
+        id={'input-' + Props.label.toLowerCase()}
+        options={files}
+        size="small"
+        style={{ flexGrow: 1 }}
+        renderInput={params => (
+          <TextField
+            {...params}
+            label={Props.label}
+            variant="outlined"
+            size="small"
+          />
+        )}
+      />
+      <IconButton
+        color="primary"
+        className={classes.iconButton}
+        aria-label="load"
+        onClick={handerClick}
+        size="small"
+      >
+        <SearchIcon fontSize="small" />
+      </IconButton>
     </div>
   );
 }

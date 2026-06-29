@@ -1,5 +1,16 @@
 /*
-    See the JupyterLab Developer Guide for useful CSS Patterns:
-
-    https://jupyterlab.readthedocs.io/en/stable/developer/css.html
+    Molecular Visualizer Extension Styles
 */
+
+/* Make the widget fill available space in JupyterLab main area */
+.jp-ReactWidget.mol-visualizer-widget {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* NGL viewer fullscreen styling */
+.mol-visualizer-widget canvas {
+  max-width: 100%;
+  max-height: 100%;
+}

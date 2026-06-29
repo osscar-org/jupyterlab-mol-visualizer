@@ -8,13 +8,16 @@ import * as _ from 'underscore';
 
 import { IDefaultFileBrowser } from '@jupyterlab/filebrowser';
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
+import { Message } from '@lumino/messaging';
 
 import VerticalSlider from './sliders';
 import SwitchLabels from './switches';
 import Inputs from './inputs';
-import Grid from '@material-ui/core/Grid';
-import { toArray, map } from '@lumino/algorithm';
+import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
+import Box from '@material-ui/core/Box';
+import { toArray, map } from '@lumino/algorithm';
+import { molIcon } from './icons';
 
 /**
  * A Counter Lumino Widget that wraps a CounterComponent.
@@ -29,10 +32,12 @@ export class CounterWidget extends ReactWidget {
   currentDirectory: string;
   browserFactory: IDefaultFileBrowser;
   theme: string;
+  private _stageReady = false;
 
   constructor(browserFactory: IDefaultFileBrowser, theme: string) {
     super();
     this.addClass('jp-ReactWidget');
+    this.addClass('mol-visualizer-widget');
     this.uuid = _.uniqueId('ngl_');
     this.theme = theme;
 
@@ -42,15 +47,25 @@ export class CounterWidget extends ReactWidget {
       this.browserFactory?.model.path + '/'
     );
 
-    window.requestAnimationFrame(() => {
-      this.visualizer();
-    });
-
     this.addStructure = this.addStructure.bind(this);
     this.addIsosurface = this.addIsosurface.bind(this);
     this.getCurrentDirectory = this.getCurrentDirectory.bind(this);
     this.updateDatasource = this.updateDatasource.bind(this);
     this.getFileList = this.getFileList.bind(this);
+  }
+
+  /**
+   * Initialize the NGL stage after the widget is attached to the DOM.
+   */
+  onAfterAttach(msg: Message): void {
+    super.onAfterAttach(msg);
+    // Small delay to ensure the React DOM is fully rendered
+    setTimeout(() => {
+      if (!this._stageReady) {
+        this.visualizer();
+        this._stageReady = true;
+      }
+    }, 50);
   }
 
   getCurrentDirectory() {
@@ -85,20 +100,24 @@ export class CounterWidget extends ReactWidget {
     if (this.theme === 'light') {
       this.stage = new NGL.Stage(this.uuid, { backgroundColor: 'white' });
     } else {
-      this.stage = new NGL.Stage(this.uuid, { backgroundColor: 'black' });
+      this.stage = new NGL.Stage(this.uuid, { backgroundColor: '#1a1a2e' });
     }
 
     window.addEventListener(
       'resize',
-      event => {
-        this.stage.handleResize();
+      () => {
+        if (this.stage) {
+          this.stage.handleResize();
+        }
       },
       false
     );
 
-    this.stage.viewer.container.addEventListener('dblclick', () => {
-      this.stage.toggleFullscreen();
-    });
+    if (this.stage && this.stage.viewer && this.stage.viewer.container) {
+      this.stage.viewer.container.addEventListener('dblclick', () => {
+        this.stage.toggleFullscreen();
+      });
+    }
   }
 
   addStructure(filename: string) {
@@ -110,7 +129,6 @@ export class CounterWidget extends ReactWidget {
       .loadFile('data://' + filename, { name: 'structure1' })
       .then((o: any) => {
         o.addRepresentation('ball+stick');
-
         o.autoView();
       });
   }
@@ -160,38 +178,47 @@ export class CounterWidget extends ReactWidget {
   }
 
   updateIsosurface(e: number) {
+    if (!this.stage) {
+      return;
+    }
     this.stage
       .getRepresentationsByName('surface')
       .setParameters({ opacity: e });
 
-    this.stage.getComponentsByName('surface_1').list[0].setVisibility(true);
-    this.stage.getComponentsByName('surface_2').list[0].setVisibility(true);
+    const c1 = this.stage.getComponentsByName('surface_1');
+    const c2 = this.stage.getComponentsByName('surface_2');
+    if (c1 && c1.list && c1.list[0]) {
+      c1.list[0].setVisibility(true);
+    }
+    if (c2 && c2.list && c2.list[0]) {
+      c2.list[0].setVisibility(true);
+    }
   }
 
   updateIsolevel(e: number, filename: string) {
-    this.stage
-      .getComponentsByName(filename)
-      .list[0].eachRepresentation((reprElem: any) => {
+    const comp = this.stage.getComponentsByName(filename);
+    if (comp && comp.list && comp.list[0]) {
+      comp.list[0].eachRepresentation((reprElem: any) => {
         reprElem.setParameters({ isolevel: e });
       });
+    }
   }
 
   toggleVisibility(filename: string) {
     const a = this.stage.getComponentsByName(filename).list[0];
-    a.setVisibility(!a.visible);
-  }
-
-  setVisibility(filename: string, val: boolean) {
-    const a = this.stage.getComponentsByName(filename).list[0];
-    a.setVisibility(val);
+    if (a) {
+      a.setVisibility(!a.visible);
+    }
   }
 
   toggleSpin() {
-    this.stage.toggleSpin();
+    if (this.stage) {
+      this.stage.toggleSpin();
+    }
   }
 
   render(): JSX.Element {
-    const func1 = (): void => this.stage.toggleSpin();
+    const func1 = (): void => this.toggleSpin();
     const func2 = (): void => this.toggleVisibility('surface_1');
     const func3 = (): void => this.toggleVisibility('surface_2');
 
@@ -204,63 +231,218 @@ export class CounterWidget extends ReactWidget {
       this.toggleVisibility('surface_2');
     };
 
+    const isDark = this.theme === 'dark';
+
+    const sidebarBg = isDark ? '#16213e' : '#ffffff';
+    const sidebarAccent = isDark ? '#0f3460' : '#fafafa';
+    const textSecondary = isDark ? '#b0b0b0' : '#616161';
+    const viewerBg = isDark ? '#1a1a2e' : '#e8e8e8';
+    const borderColor = isDark ? '#1a1a2e' : '#e0e0e0';
+
     return (
-      <div>
-        <VerticalSlider
-          uuid={this.uuid}
-          theme={this.theme}
-          changeHandler1={(
-            event: React.ChangeEvent<unknown>,
-            val: number | number[]
-          ): void => {
-            const value = (val as number) / 100.0;
-            this.updateIsosurface(value);
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          height: '100%',
+          overflow: 'hidden'
+        }}
+      >
+        {/* Header */}
+        <Paper
+          elevation={2}
+          style={{
+            flexShrink: 0,
+            backgroundColor: isDark ? '#1a1a2e' : '#f5f5f5',
+            borderRadius: 0,
+            padding: '8px 16px'
           }}
-          changeHandler2={(
-            event: React.ChangeEvent<unknown>,
-            val: number | number[]
-          ): void => {
-            const value = val as number;
-            this.updateIsolevel(value, 'surface_1');
-            this.updateIsolevel(-value, 'surface_2');
+        >
+          <Box display="flex" alignItems="center">
+            <molIcon.react tag="span" width="28px" height="28px" />
+            <Typography
+              variant="h6"
+              style={{ fontWeight: 600, marginLeft: '12px' }}
+            >
+              Molecular Orbital Visualizer
+            </Typography>
+          </Box>
+        </Paper>
+
+        {/* Main content: sidebar + viewer */}
+        <div
+          style={{
+            flex: 1,
+            display: 'flex',
+            minHeight: 0,
+            overflow: 'hidden'
           }}
-        />
+        >
+          {/* Left Sidebar */}
+          <div
+            style={{
+              width: '300px',
+              minWidth: '300px',
+              overflowY: 'auto',
+              overflowX: 'hidden',
+              padding: '12px',
+              backgroundColor: sidebarAccent,
+              borderRight: `1px solid ${borderColor}`
+            }}
+          >
+            {/* File Selection */}
+            <Paper
+              elevation={1}
+              style={{
+                padding: '12px',
+                marginBottom: '12px',
+                backgroundColor: sidebarBg
+              }}
+            >
+              <Typography
+                variant="overline"
+                display="block"
+                gutterBottom
+                style={{
+                  color: textSecondary,
+                  letterSpacing: '0.5px',
+                  lineHeight: 1
+                }}
+              >
+                File Selection
+              </Typography>
+              <Box mb={1.5}>
+                <Inputs
+                  getFiles={this.getFileList}
+                  types={['sdf', 'cif']}
+                  factory={this.browserFactory}
+                  label="Structure"
+                  options={this.getFileList(['sdf', 'cif'])}
+                  inputHandler={this.addStructure}
+                />
+              </Box>
+              <Inputs
+                getFiles={this.getFileList}
+                types={['cube']}
+                factory={this.browserFactory}
+                label="Isosurface"
+                options={this.getFileList(['cube'])}
+                inputHandler={this.addIsosurface}
+              />
+            </Paper>
 
-        <Grid container spacing={3} justifyContent="center">
-          <Grid item sm={3}>
-            <Inputs
-              getFiles={this.getFileList}
-              types={['sdf', 'cif']}
-              factory={this.browserFactory}
-              label="Structure"
-              options={this.getFileList(['sdf', 'cif'])}
-              inputHandler={this.addStructure}
-            ></Inputs>
-          </Grid>
-          <Grid item sm={3}>
-            <Inputs
-              getFiles={this.getFileList}
-              types={['cube']}
-              factory={this.browserFactory}
-              label="Isosurface"
-              options={this.getFileList(['cube'])}
-              inputHandler={this.addIsosurface}
-            ></Inputs>
-          </Grid>
-        </Grid>
+            {/* Controls */}
+            <Paper
+              elevation={1}
+              style={{
+                padding: '12px',
+                marginBottom: '12px',
+                backgroundColor: sidebarBg
+              }}
+            >
+              <Typography
+                variant="overline"
+                display="block"
+                gutterBottom
+                style={{
+                  color: textSecondary,
+                  letterSpacing: '0.5px',
+                  lineHeight: 1
+                }}
+              >
+                Controls
+              </Typography>
+              <SwitchLabels
+                clickHandler1={func1}
+                clickHandler2={func2}
+                clickHandler3={func3}
+                bclick1={bfunc1}
+                bclick2={bfunc2}
+              />
+            </Paper>
 
-        <SwitchLabels
-          clickHandler1={func1}
-          clickHandler2={func2}
-          clickHandler3={func3}
-          bclick1={bfunc1}
-          bclick2={bfunc2}
-        />
+            {/* Sliders */}
+            <Paper
+              elevation={1}
+              style={{
+                padding: '12px',
+                marginBottom: '12px',
+                backgroundColor: sidebarBg
+              }}
+            >
+              <Typography
+                variant="overline"
+                display="block"
+                gutterBottom
+                style={{
+                  color: textSecondary,
+                  letterSpacing: '0.5px',
+                  lineHeight: 1
+                }}
+              >
+                Display Settings
+              </Typography>
+              <VerticalSlider
+                uuid={this.uuid}
+                theme={this.theme}
+                changeHandler1={(
+                  event: React.ChangeEvent<unknown>,
+                  val: number | number[]
+                ): void => {
+                  const value = (val as number) / 100.0;
+                  this.updateIsosurface(value);
+                }}
+                changeHandler2={(
+                  event: React.ChangeEvent<unknown>,
+                  val: number | number[]
+                ): void => {
+                  const value = val as number;
+                  this.updateIsolevel(value, 'surface_1');
+                  this.updateIsolevel(-value, 'surface_2');
+                }}
+              />
+            </Paper>
 
-        <Typography variant="h6" align="center">
-          Please select structure and Gaussian cube files from current directory
-          to visualize.
-        </Typography>
+            {/* Tip */}
+            <Typography
+              variant="caption"
+              align="center"
+              display="block"
+              style={{
+                color: isDark ? '#6a7290' : '#9e9e9e',
+                fontSize: '0.7rem',
+                fontStyle: 'italic',
+                padding: '8px 4px'
+              }}
+            >
+              Select structure and cube files from the current directory.
+              Double-click the viewer for fullscreen mode.
+            </Typography>
+          </div>
+
+          {/* Viewer */}
+          <div
+            style={{
+              flex: 1,
+              minWidth: 0,
+              display: 'flex',
+              padding: '8px',
+              backgroundColor: viewerBg
+            }}
+          >
+            <div
+              id={this.uuid}
+              style={{
+                flex: 1,
+                borderRadius: '4px',
+                overflow: 'hidden',
+                boxShadow: isDark
+                  ? '0 4px 24px rgba(0,0,0,0.6)'
+                  : '0 4px 24px rgba(0,0,0,0.12)'
+              }}
+            />
+          </div>
+        </div>
       </div>
     );
   }
