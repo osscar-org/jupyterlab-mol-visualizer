@@ -3,10 +3,23 @@
 [![Build](https://github.com/osscar-org/jupyterlab-mol-visualizer/actions/workflows/build.yml/badge.svg)](https://github.com/osscar-org/jupyterlab-mol-visualizer/actions/workflows/build.yml)
 
 A JupyterLab launcher extension to view the molecular orbitals (MOs).
-[NGL](https://github.com/nglviewer/ngl) JavaScript package was employed to visulizer the MOs.
+[NGL](https://github.com/nglviewer/ngl) JavaScript package was employed to visualize the MOs.
 The icon of the extension is from [SVG Repo](https://www.svgrepo.com/svg/231591/molecule).
 
 ![demo](https://raw.githubusercontent.com/osscar-org/jupyterlab-mol-visualizer/main/binder/demo.gif)
+
+## Features
+
+- **Large interactive viewer** — the molecular visualization fills the available screen space with a sidebar
+  control panel
+- **Structure & isosurface loading** — load `.sdf`, `.cif` (structure) and `.cube` (Gaussian cube) files
+  from the current JupyterLab directory
+- **Auto-rotate, visibility toggles** — toggle spin, show/hide structure and positive/negative isosurfaces
+- **Opacity & isovalue sliders** — fine-tune the display with real-time sliders
+- **Viewer background color picker** — choose from 8 preset background colors
+- **Auto Centre** — re-centre the camera on the molecule with a smooth animation
+- **Save PNG** — export the current view as a high-resolution PNG image
+- **Dark & light theme** — adapts to JupyterLab's theme automatically
 
 ## Try it with Binder
 
@@ -40,31 +53,45 @@ Note: You will need NodeJS to build the extension package.
 
 The `jlpm` command is JupyterLab's pinned version of
 [yarn](https://yarnpkg.com/) that is installed with JupyterLab. You may use
-`yarn` or `npm` in lieu of `jlpm` below.
+`yarn` or `npm` in lieu of `jlpm` below. For a faster editable install, `npm`
+is recommended.
 
 ```bash
 # Clone the repo to your local environment
 # Change directory to the jupyterlab_mol_visualizer directory
+# Install npm dependencies (only needed first time)
+npm install
 # Install package in development mode
 pip install -e "."
-# Link your development version of the extension with JupyterLab
-jupyter labextension develop . --overwrite
-# Rebuild extension Typescript source after making changes
-jlpm build
 ```
 
-You can watch the source directory and run JupyterLab at the same time in different terminals to watch for changes in the extension's source and automatically rebuild the extension.
+After the first install, subsequent `pip install -e .` runs are near-instant
+(the build step is skipped once the labextension exists). To rebuild the
+extension after making TypeScript changes:
+
+```bash
+npm run build
+```
+
+You can watch the source directory and run JupyterLab at the same time in
+different terminals to watch for changes in the extension's source and
+automatically rebuild the extension.
 
 ```bash
 # Watch the source directory in one terminal, automatically rebuilding when needed
-jlpm watch
+npm run watch
 # Run JupyterLab in another terminal
 jupyter lab
 ```
 
-With the watch command running, every saved change will immediately be built locally and available in your running JupyterLab. Refresh JupyterLab to load the change in your browser (you may need to wait several seconds for the extension to be rebuilt).
+With the watch command running, every saved change will immediately be built
+locally and available in your running JupyterLab. Refresh JupyterLab to load
+the change in your browser (you may need to wait several seconds for the
+extension to be rebuilt).
 
-By default, the `jlpm build` command generates the source maps for this extension to make it easier to debug using the browser dev tools. To also generate source maps for the JupyterLab core extensions, you can run the following command:
+By default, the build generates the source maps for this extension to make it
+easier to debug using the browser dev tools. To also generate source maps for
+the JupyterLab core extensions, you can run the following command:
 
 ```bash
 jupyter lab build --minimize=False
@@ -89,8 +116,8 @@ This extension is using [Jest](https://jestjs.io/) for JavaScript code testing.
 To execute them, execute:
 
 ```sh
-jlpm
-jlpm test
+npm install
+npm test
 ```
 
 #### Integration tests
