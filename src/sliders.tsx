@@ -23,11 +23,18 @@ export default function VerticalSlider(Props: INglProps) {
       width: '100%',
       paddingTop: '8px'
     },
-    sliderLabel: {
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: '4px'
+    slider: {
+      padding: '10px 0',
+      '& .MuiSlider-rail': {
+        height: 4
+      },
+      '& .MuiSlider-track': {
+        height: 4
+      },
+      '& .MuiSlider-thumb': {
+        width: 14,
+        height: 14
+      }
     }
   });
 
@@ -62,6 +69,7 @@ export default function VerticalSlider(Props: INglProps) {
           Opacity
         </Typography>
         <Slider
+          className={classes.slider}
           defaultValue={30}
           getAriaValueText={value => `${value}%`}
           valueLabelDisplay="auto"
@@ -82,6 +90,7 @@ export default function VerticalSlider(Props: INglProps) {
           Isovalue
         </Typography>
         <Slider
+          className={classes.slider}
           defaultValue={0.01}
           aria-labelledby="isovalue-slider"
           getAriaValueText={value => `${value}`}

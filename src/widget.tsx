@@ -250,7 +250,7 @@ export class CounterWidget extends ReactWidget {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `mol-viewer-${Date.now()}.png`;
+        a.download = 'mol-viewer.png';
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
