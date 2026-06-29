@@ -20,6 +20,7 @@ classifiers = [
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
 ]
 dependencies = [
 ]
@@ -56,8 +57,8 @@ build_cmd = "build:prod"
 npm = ["jlpm"]
 
 [tool.hatch.build.hooks.jupyter-builder.editable-build-kwargs]
-build_cmd = "install:extension"
-npm = ["jlpm"]
+build_cmd = "build:fast"
+npm = ["npm"]
 source_dir = "src"
 build_dir = "jupyterlab_mol_visualizer/labextension"
 
