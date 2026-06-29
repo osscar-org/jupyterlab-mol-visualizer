@@ -16,6 +16,7 @@ import Inputs from './inputs';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
+import { createTheme, ThemeProvider } from '@material-ui/core/styles';
 import { toArray, map } from '@lumino/algorithm';
 import { molIcon } from './icons';
 
@@ -233,217 +234,230 @@ export class CounterWidget extends ReactWidget {
 
     const isDark = this.theme === 'dark';
 
-    const sidebarBg = isDark ? '#16213e' : '#ffffff';
-    const sidebarAccent = isDark ? '#0f3460' : '#fafafa';
-    const textSecondary = isDark ? '#b0b0b0' : '#616161';
-    const viewerBg = isDark ? '#1a1a2e' : '#e8e8e8';
-    const borderColor = isDark ? '#1a1a2e' : '#e0e0e0';
+    const muiTheme = createTheme({
+      palette: {
+        type: isDark ? 'dark' : 'light',
+        primary: { main: '#4fc3f7' },
+        secondary: { main: '#f06292' }
+      }
+    });
 
     return (
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          height: '100%',
-          overflow: 'hidden'
-        }}
-      >
-        {/* Header */}
-        <Paper
-          elevation={2}
-          style={{
-            flexShrink: 0,
-            backgroundColor: isDark ? '#1a1a2e' : '#f5f5f5',
-            borderRadius: 0,
-            padding: '8px 16px'
-          }}
-        >
-          <Box display="flex" alignItems="center">
-            <molIcon.react tag="span" width="28px" height="28px" />
-            <Typography
-              variant="h6"
-              style={{ fontWeight: 600, marginLeft: '12px' }}
-            >
-              Molecular Orbital Visualizer
-            </Typography>
-          </Box>
-        </Paper>
-
-        {/* Main content: sidebar + viewer */}
+      <ThemeProvider theme={muiTheme}>
         <div
           style={{
-            flex: 1,
             display: 'flex',
-            minHeight: 0,
-            overflow: 'hidden'
+            flexDirection: 'column',
+            height: '100%',
+            overflow: 'hidden',
+            backgroundColor: isDark ? '#121212' : '#fafafa',
+            color: isDark ? '#e0e0e0' : '#212121'
           }}
         >
-          {/* Left Sidebar */}
-          <div
+          {/* Header */}
+          <Paper
+            elevation={4}
             style={{
-              width: '300px',
-              minWidth: '300px',
-              overflowY: 'auto',
-              overflowX: 'hidden',
-              padding: '12px',
-              backgroundColor: sidebarAccent,
-              borderRight: `1px solid ${borderColor}`
+              flexShrink: 0,
+              backgroundColor: isDark ? '#1e1e1e' : '#f5f5f5',
+              borderRadius: 0,
+              padding: '8px 16px'
             }}
           >
-            {/* File Selection */}
-            <Paper
-              elevation={1}
-              style={{
-                padding: '12px',
-                marginBottom: '12px',
-                backgroundColor: sidebarBg
-              }}
-            >
+            <Box display="flex" alignItems="center">
+              <molIcon.react tag="span" width="28px" height="28px" />
               <Typography
-                variant="overline"
-                display="block"
-                gutterBottom
+                variant="h6"
                 style={{
-                  color: textSecondary,
-                  letterSpacing: '0.5px',
-                  lineHeight: 1
+                  fontWeight: 600,
+                  marginLeft: '12px',
+                  color: isDark ? '#e0e0e0' : '#212121'
                 }}
               >
-                File Selection
+                Molecular Orbital Visualizer
               </Typography>
-              <Box mb={1.5}>
-                <Inputs
-                  getFiles={this.getFileList}
-                  types={['sdf', 'cif']}
-                  factory={this.browserFactory}
-                  label="Structure"
-                  options={this.getFileList(['sdf', 'cif'])}
-                  inputHandler={this.addStructure}
-                />
-              </Box>
-              <Inputs
-                getFiles={this.getFileList}
-                types={['cube']}
-                factory={this.browserFactory}
-                label="Isosurface"
-                options={this.getFileList(['cube'])}
-                inputHandler={this.addIsosurface}
-              />
-            </Paper>
+            </Box>
+          </Paper>
 
-            {/* Controls */}
-            <Paper
-              elevation={1}
-              style={{
-                padding: '12px',
-                marginBottom: '12px',
-                backgroundColor: sidebarBg
-              }}
-            >
-              <Typography
-                variant="overline"
-                display="block"
-                gutterBottom
-                style={{
-                  color: textSecondary,
-                  letterSpacing: '0.5px',
-                  lineHeight: 1
-                }}
-              >
-                Controls
-              </Typography>
-              <SwitchLabels
-                clickHandler1={func1}
-                clickHandler2={func2}
-                clickHandler3={func3}
-                bclick1={bfunc1}
-                bclick2={bfunc2}
-              />
-            </Paper>
-
-            {/* Sliders */}
-            <Paper
-              elevation={1}
-              style={{
-                padding: '12px',
-                marginBottom: '12px',
-                backgroundColor: sidebarBg
-              }}
-            >
-              <Typography
-                variant="overline"
-                display="block"
-                gutterBottom
-                style={{
-                  color: textSecondary,
-                  letterSpacing: '0.5px',
-                  lineHeight: 1
-                }}
-              >
-                Display Settings
-              </Typography>
-              <VerticalSlider
-                uuid={this.uuid}
-                theme={this.theme}
-                changeHandler1={(
-                  event: React.ChangeEvent<unknown>,
-                  val: number | number[]
-                ): void => {
-                  const value = (val as number) / 100.0;
-                  this.updateIsosurface(value);
-                }}
-                changeHandler2={(
-                  event: React.ChangeEvent<unknown>,
-                  val: number | number[]
-                ): void => {
-                  const value = val as number;
-                  this.updateIsolevel(value, 'surface_1');
-                  this.updateIsolevel(-value, 'surface_2');
-                }}
-              />
-            </Paper>
-
-            {/* Tip */}
-            <Typography
-              variant="caption"
-              align="center"
-              display="block"
-              style={{
-                color: isDark ? '#6a7290' : '#9e9e9e',
-                fontSize: '0.7rem',
-                fontStyle: 'italic',
-                padding: '8px 4px'
-              }}
-            >
-              Select structure and cube files from the current directory.
-              Double-click the viewer for fullscreen mode.
-            </Typography>
-          </div>
-
-          {/* Viewer */}
+          {/* Main content: sidebar + viewer */}
           <div
             style={{
               flex: 1,
-              minWidth: 0,
               display: 'flex',
-              padding: '8px',
-              backgroundColor: viewerBg
+              minHeight: 0,
+              overflow: 'hidden'
             }}
           >
+            {/* Left Sidebar */}
             <div
-              id={this.uuid}
+              style={{
+                width: '300px',
+                minWidth: '300px',
+                overflowY: 'auto',
+                overflowX: 'hidden',
+                padding: '12px',
+                backgroundColor: isDark ? '#1e1e1e' : '#fafafa',
+                borderRight: `1px solid ${isDark ? '#333333' : '#e0e0e0'}`
+              }}
+            >
+              {/* File Selection */}
+              <Paper
+                elevation={isDark ? 2 : 1}
+                style={{
+                  padding: '12px',
+                  marginBottom: '12px',
+                  backgroundColor: isDark ? '#2c2c2c' : '#ffffff'
+                }}
+              >
+                <Typography
+                  variant="overline"
+                  display="block"
+                  gutterBottom
+                  style={{
+                    color: isDark ? '#90caf9' : '#1565c0',
+                    letterSpacing: '0.5px',
+                    lineHeight: 1,
+                    fontWeight: 600
+                  }}
+                >
+                  File Selection
+                </Typography>
+                <Box mb={1.5}>
+                  <Inputs
+                    getFiles={this.getFileList}
+                    types={['sdf', 'cif']}
+                    factory={this.browserFactory}
+                    label="Structure"
+                    options={this.getFileList(['sdf', 'cif'])}
+                    inputHandler={this.addStructure}
+                  />
+                </Box>
+                <Inputs
+                  getFiles={this.getFileList}
+                  types={['cube']}
+                  factory={this.browserFactory}
+                  label="Isosurface"
+                  options={this.getFileList(['cube'])}
+                  inputHandler={this.addIsosurface}
+                />
+              </Paper>
+
+              {/* Controls */}
+              <Paper
+                elevation={isDark ? 2 : 1}
+                style={{
+                  padding: '12px',
+                  marginBottom: '12px',
+                  backgroundColor: isDark ? '#2c2c2c' : '#ffffff'
+                }}
+              >
+                <Typography
+                  variant="overline"
+                  display="block"
+                  gutterBottom
+                  style={{
+                    color: isDark ? '#90caf9' : '#1565c0',
+                    letterSpacing: '0.5px',
+                    lineHeight: 1,
+                    fontWeight: 600
+                  }}
+                >
+                  Controls
+                </Typography>
+                <SwitchLabels
+                  clickHandler1={func1}
+                  clickHandler2={func2}
+                  clickHandler3={func3}
+                  bclick1={bfunc1}
+                  bclick2={bfunc2}
+                />
+              </Paper>
+
+              {/* Sliders */}
+              <Paper
+                elevation={isDark ? 2 : 1}
+                style={{
+                  padding: '12px',
+                  marginBottom: '12px',
+                  backgroundColor: isDark ? '#2c2c2c' : '#ffffff'
+                }}
+              >
+                <Typography
+                  variant="overline"
+                  display="block"
+                  gutterBottom
+                  style={{
+                    color: isDark ? '#90caf9' : '#1565c0',
+                    letterSpacing: '0.5px',
+                    lineHeight: 1,
+                    fontWeight: 600
+                  }}
+                >
+                  Display Settings
+                </Typography>
+                <VerticalSlider
+                  uuid={this.uuid}
+                  theme={this.theme}
+                  changeHandler1={(
+                    event: React.ChangeEvent<unknown>,
+                    val: number | number[]
+                  ): void => {
+                    const value = (val as number) / 100.0;
+                    this.updateIsosurface(value);
+                  }}
+                  changeHandler2={(
+                    event: React.ChangeEvent<unknown>,
+                    val: number | number[]
+                  ): void => {
+                    const value = val as number;
+                    this.updateIsolevel(value, 'surface_1');
+                    this.updateIsolevel(-value, 'surface_2');
+                  }}
+                />
+              </Paper>
+
+              {/* Tip */}
+              <Typography
+                variant="caption"
+                align="center"
+                display="block"
+                style={{
+                  color: isDark ? '#9e9e9e' : '#9e9e9e',
+                  fontSize: '0.7rem',
+                  fontStyle: 'italic',
+                  padding: '8px 4px'
+                }}
+              >
+                Select structure and cube files from the current directory.
+                Double-click the viewer for fullscreen mode.
+              </Typography>
+            </div>
+
+            {/* Viewer */}
+            <div
               style={{
                 flex: 1,
-                borderRadius: '4px',
-                overflow: 'hidden',
-                boxShadow: isDark
-                  ? '0 4px 24px rgba(0,0,0,0.6)'
-                  : '0 4px 24px rgba(0,0,0,0.12)'
+                minWidth: 0,
+                display: 'flex',
+                padding: '8px',
+                backgroundColor: isDark ? '#121212' : '#e8e8e8'
               }}
-            />
+            >
+              <div
+                id={this.uuid}
+                style={{
+                  flex: 1,
+                  borderRadius: '4px',
+                  overflow: 'hidden',
+                  boxShadow: isDark
+                    ? '0 4px 24px rgba(0,0,0,0.8)'
+                    : '0 4px 24px rgba(0,0,0,0.12)'
+                }}
+              />
+            </div>
           </div>
         </div>
-      </div>
+      </ThemeProvider>
     );
   }
 }
