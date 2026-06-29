@@ -16,6 +16,9 @@ import Inputs from './inputs';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
+import Button from '@material-ui/core/Button';
+import CenterFocusStrongIcon from '@material-ui/icons/CenterFocusStrong';
+import ImageIcon from '@material-ui/icons/Image';
 import { createTheme, ThemeProvider } from '@material-ui/core/styles';
 import { toArray, map } from '@lumino/algorithm';
 import { molIcon } from './icons';
@@ -34,6 +37,7 @@ export class CounterWidget extends ReactWidget {
   browserFactory: IDefaultFileBrowser;
   theme: string;
   private _stageReady = false;
+  viewerBgColor: string;
 
   constructor(browserFactory: IDefaultFileBrowser, theme: string) {
     super();
@@ -41,6 +45,7 @@ export class CounterWidget extends ReactWidget {
     this.addClass('mol-visualizer-widget');
     this.uuid = _.uniqueId('ngl_');
     this.theme = theme;
+    this.viewerBgColor = theme === 'light' ? 'white' : '#1a1a2e';
 
     this.browserFactory = browserFactory;
     this.currentDirectory = URLExt.join(
@@ -98,11 +103,9 @@ export class CounterWidget extends ReactWidget {
   visualizer() {
     this.updateDatasource();
 
-    if (this.theme === 'light') {
-      this.stage = new NGL.Stage(this.uuid, { backgroundColor: 'white' });
-    } else {
-      this.stage = new NGL.Stage(this.uuid, { backgroundColor: '#1a1a2e' });
-    }
+    this.stage = new NGL.Stage(this.uuid, {
+      backgroundColor: this.viewerBgColor
+    });
 
     window.addEventListener(
       'resize',
@@ -216,6 +219,43 @@ export class CounterWidget extends ReactWidget {
     if (this.stage) {
       this.stage.toggleSpin();
     }
+  }
+
+  setViewerBgColor(color: string) {
+    this.viewerBgColor = color;
+    if (this.stage) {
+      this.stage.setParameters({ backgroundColor: color });
+    }
+  }
+
+  autoCenter() {
+    if (!this.stage) {
+      return;
+    }
+    this.stage.autoView(1000);
+  }
+
+  downloadPNG() {
+    if (!this.stage) {
+      return;
+    }
+    this.stage
+      .makeImage({
+        factor: 2,
+        antialias: true,
+        trim: false,
+        transparent: false
+      })
+      .then((blob: Blob) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `mol-viewer-${Date.now()}.png`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      });
   }
 
   render(): JSX.Element {
@@ -371,6 +411,28 @@ export class CounterWidget extends ReactWidget {
                   bclick1={bfunc1}
                   bclick2={bfunc2}
                 />
+                <Box mt={1} display="flex" justifyContent="center" gridGap={8}>
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    color="primary"
+                    startIcon={<CenterFocusStrongIcon />}
+                    onClick={() => this.autoCenter()}
+                    style={{ textTransform: 'none', fontSize: '0.75rem' }}
+                  >
+                    Auto Centre
+                  </Button>
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    color="secondary"
+                    startIcon={<ImageIcon />}
+                    onClick={() => this.downloadPNG()}
+                    style={{ textTransform: 'none', fontSize: '0.75rem' }}
+                  >
+                    Save PNG
+                  </Button>
+                </Box>
               </Paper>
 
               {/* Sliders */}
@@ -414,6 +476,70 @@ export class CounterWidget extends ReactWidget {
                     this.updateIsolevel(-value, 'surface_2');
                   }}
                 />
+              </Paper>
+
+              {/* Viewer Background Color */}
+              <Paper
+                elevation={isDark ? 2 : 1}
+                style={{
+                  padding: '12px',
+                  marginBottom: '12px',
+                  backgroundColor: isDark ? '#2c2c2c' : '#ffffff'
+                }}
+              >
+                <Typography
+                  variant="overline"
+                  display="block"
+                  gutterBottom
+                  style={{
+                    color: isDark ? '#90caf9' : '#1565c0',
+                    letterSpacing: '0.5px',
+                    lineHeight: 1,
+                    fontWeight: 600
+                  }}
+                >
+                  Viewer Background
+                </Typography>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                  {[
+                    { color: 'white', label: 'White' },
+                    { color: '#e0e0e0', label: 'Gray' },
+                    { color: '#1a1a2e', label: 'Dark' },
+                    { color: 'black', label: 'Black' },
+                    { color: '#e8f5e9', label: 'Mint' },
+                    { color: '#fff3e0', label: 'Warm' },
+                    { color: '#e3f2fd', label: 'Sky' },
+                    { color: '#263238', label: 'Slate' }
+                  ].map(({ color, label }) => (
+                    <button
+                      key={color}
+                      title={label}
+                      onClick={() => this.setViewerBgColor(color)}
+                      style={{
+                        width: '28px',
+                        height: '28px',
+                        borderRadius: '50%',
+                        backgroundColor: color,
+                        border:
+                          this.viewerBgColor === color
+                            ? '3px solid #4fc3f7'
+                            : color === 'white' || color === '#e0e0e0' ||
+                              color === '#e8f5e9' || color === '#fff3e0' ||
+                              color === '#e3f2fd'
+                            ? '1px solid #bdbdbd'
+                            : '1px solid #555',
+                        cursor: 'pointer',
+                        padding: 0,
+                        outline: 'none',
+                        boxShadow:
+                          this.viewerBgColor === color
+                            ? '0 0 6px rgba(79,195,247,0.6)'
+                            : 'none',
+                        transition: 'box-shadow 0.2s, border 0.2s'
+                      }}
+                    />
+                  ))}
+                </div>
               </Paper>
 
               {/* Tip */}
