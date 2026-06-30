@@ -28,9 +28,6 @@
     "type": "git",
     "url": "https://github.com/osscar-org/jupyterlab-mol-visualizer.git"
   },
-  "workspaces": [
-    "ui-tests"
-  ],
   "scripts": {
     "build": "jlpm build:lib && jlpm build:labextension:dev",
     "build:fast": "bash -c 'if [ -f jupyterlab_mol_visualizer/labextension/static/style.js ]; then echo \"Build exists, skipping\"; else tsc --sourceMap && jupyter labextension build --development True .; fi'",

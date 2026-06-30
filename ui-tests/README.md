@@ -12,7 +12,7 @@ in [jupyter_server_test_config.py](./jupyter_server_test_config.py).
 
 The default configuration will produce video for failing tests and an HTML report.
 
-> There is a new experimental UI mode that you may fall in love with; see [that video](https://www.youtube.com/watch?v=jF0yA-JLQW0).
+> (search for "Playwright UI Mode" on YouTube or the Playwright blog).
 
 ## Run the tests
 
