@@ -4,7 +4,7 @@
 
 A JupyterLab launcher extension to view the molecular orbitals (MOs).
 [NGL](https://github.com/nglviewer/ngl) JavaScript package was employed to visualize the MOs.
-The icon of the extension is from [SVG Repo](https://www.svgrepo.com/svg/231591/molecule).
+The icon of the extension (bundled as `style/molecule.svg`) is adapted from SVG Repo.
 
 ![demo](https://raw.githubusercontent.com/osscar-org/jupyterlab-mol-visualizer/main/binder/demo.gif)
 
