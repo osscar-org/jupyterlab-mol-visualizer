@@ -523,8 +523,10 @@ export class CounterWidget extends ReactWidget {
                         border:
                           this.viewerBgColor === color
                             ? '3px solid #4fc3f7'
-                            : color === 'white' || color === '#e0e0e0' ||
-                              color === '#e8f5e9' || color === '#fff3e0' ||
+                            : color === 'white' ||
+                              color === '#e0e0e0' ||
+                              color === '#e8f5e9' ||
+                              color === '#fff3e0' ||
                               color === '#e3f2fd'
                             ? '1px solid #bdbdbd'
                             : '1px solid #555',

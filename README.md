@@ -135,12 +135,11 @@ See [RELEASE](RELEASE.md)
 
 When using the content of this repository, please cite the following two articles:
 
-1. D. Du, T. J. Baird, S. Bonella and G. Pizzi, OSSCAR, an open platform for collaborative development of computational tools for education in science, *Computer Physics Communications*, **282**, 108546 (2023).
-https://doi.org/10.1016/j.cpc.2022.108546
+1. D. Du, T. J. Baird, S. Bonella and G. Pizzi, OSSCAR, an open platform for collaborative development of computational tools for education in science, _Computer Physics Communications_, **282**, 108546 (2023).
+   https://doi.org/10.1016/j.cpc.2022.108546
 
-2. D. Du, T. J. Baird, K. Eimre, S. Bonella, G. Pizzi, Jupyter widgets and extensions for education and research in computational physics and chemistry, *Computer Physics Communications*, **305**, 109353 (2024).
-https://doi.org/10.1016/j.cpc.2024.109353
-
+2. D. Du, T. J. Baird, K. Eimre, S. Bonella, G. Pizzi, Jupyter widgets and extensions for education and research in computational physics and chemistry, _Computer Physics Communications_, **305**, 109353 (2024).
+   https://doi.org/10.1016/j.cpc.2024.109353
 
 ## Acknowledgements
 
