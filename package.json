@@ -19,9 +19,7 @@
   },
   "files": [
     "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
-    "style/**/*.{css,js,eot,gif,html,jpg,json,png,svg,woff2,ttf}",
-    "yarn.lock",
-    ".yarnrc.yml"
+    "style/**/*.{css,js,eot,gif,html,jpg,json,png,svg,woff2,ttf}"
   ],
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -188,7 +186,8 @@
     "rules": {
       "property-no-vendor-prefix": null,
       "selector-no-vendor-prefix": null,
-      "value-no-vendor-prefix": null
+      "value-no-vendor-prefix": null,
+      "selector-class-pattern": "^([a-z][a-z0-9]*)(-[a-z0-9]+)*$|^jp-[A-Z][a-zA-Z0-9]*$"
     }
   }
 }

@@ -69,7 +69,8 @@ version_cmd = "hatch version"
 before-build-npm = [
     "python -m pip install 'jupyterlab>=4.0.0,<5'",
     "jlpm",
-    "jlpm build:prod"
+    "jlpm build:prod",
+    "bash -c 'touch yarn.lock .jupyter_releaser_checkout/yarn.lock 2>/dev/null; true'"
 ]
 before-build-python = ["jlpm clean:all"]
 
