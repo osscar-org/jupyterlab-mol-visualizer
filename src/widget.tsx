@@ -23,6 +23,9 @@ import { createTheme, ThemeProvider } from '@material-ui/core/styles';
 import { toArray, map } from '@lumino/algorithm';
 import { molIcon } from './icons';
 
+const STRUCTURE_FILE_TYPES = ['sdf', 'cif', 'xyz'];
+const ISOSURFACE_FILE_TYPES = ['cube'];
+
 /**
  * A Counter Lumino Widget that wraps a CounterComponent.
  */
@@ -124,17 +127,149 @@ export class CounterWidget extends ReactWidget {
     }
   }
 
-  addStructure(filename: string) {
+  getFileExtension(filename: string): string {
+    return (filename.split('.').pop() || '').toLowerCase();
+  }
+
+  async loadXyzAsPdb(filename: string): Promise<File> {
+    const response = await fetch(
+      URLExt.join(this.currentDirectory, encodeURIComponent(filename))
+    );
+    if (!response.ok) {
+      throw new Error(
+        'Unable to read ' + filename + ': HTTP ' + response.status
+      );
+    }
+    const xyzText = await response.text();
+    const pdbText = this.xyzToPdb(xyzText);
+    // Use File instead of Blob so NGL's getFileInfo can extract the .pdb
+    // extension from the name property. Blob has no name, so ext would be "".
+    const pdbFilename = filename.replace(/\.xyz$/i, '.pdb');
+    return new File([pdbText], pdbFilename, { type: 'text/plain' });
+  }
+
+  xyzToPdb(xyzText: string): string {
+    const lines = xyzText.split(String.fromCharCode(10));
+    const atomCount = Number.parseInt(lines[0]?.trim() || '', 10);
+    if (!Number.isFinite(atomCount) || atomCount < 1) {
+      throw new Error('Invalid XYZ file: first line must be an atom count');
+    }
+
+    const atomLines = lines
+      .slice(2)
+      .map(line => line.trim())
+      .filter(line => line.length > 0)
+      .slice(0, atomCount);
+
+    if (atomLines.length < atomCount) {
+      throw new Error('Invalid XYZ file: atom rows do not match atom count');
+    }
+
+    const pdbLines = atomLines.map((line, index) => {
+      const fields = line
+        .split(String.fromCharCode(9))
+        .join(' ')
+        .split(' ')
+        .filter(field => field.length > 0);
+      const element = this.normalizeElement(fields[0] || 'X');
+      const x = Number.parseFloat(fields[1]);
+      const y = Number.parseFloat(fields[2]);
+      const z = Number.parseFloat(fields[3]);
+      if (![x, y, z].every(Number.isFinite)) {
+        throw new Error('Invalid XYZ file: atom coordinates must be numbers');
+      }
+      return this.toPdbAtomLine(index + 1, element, x, y, z);
+    });
+
+    return pdbLines.concat(['END']).join(String.fromCharCode(10));
+  }
+
+  normalizeElement(value: string): string {
+    const letters = value.replace(/[^A-Za-z]/g, '');
+    if (!letters) {
+      return 'X';
+    }
+    return letters.charAt(0).toUpperCase() + letters.slice(1, 2).toLowerCase();
+  }
+
+  toPdbAtomLine(
+    index: number,
+    element: string,
+    x: number,
+    y: number,
+    z: number
+  ): string {
+    // Standard PDB HETATM record (80 columns):
+    //  1- 6: "HETATM"
+    //  7-11: serial (5, right-aligned)
+    // 12-12: space
+    // 13-16: atom name (4, left-aligned, element at 13-14)
+    // 17-17: altLoc
+    // 18-20: residue name ("MOL")
+    // 21-21: chain ID
+    // 22-26: residue seq (4, right-aligned) + insertion code
+    // 27-30: reserved
+    // 31-38: x (8.3, right-aligned)
+    // 39-46: y (8.3, right-aligned)
+    // 47-54: z (8.3, right-aligned)
+    // 55-60: occupancy (6.2)
+    // 61-66: temp factor (6.2)
+    // 67-76: reserved
+    // 77-78: element (2, right-aligned)
+    // 79-80: charge
+    const serial = index.toString().padStart(5, ' ');
+    const atomName = element.padStart(2, ' ').padEnd(4, ' ');
+    const xCoord = x.toFixed(3).padStart(8, ' ');
+    const yCoord = y.toFixed(3).padStart(8, ' ');
+    const zCoord = z.toFixed(3).padStart(8, ' ');
+    const pdbElement = element.padStart(2, ' ');
+    return (
+      'HETATM' +
+      serial +
+      ' ' +
+      atomName +
+      ' MOL     1    ' +
+      xCoord +
+      yCoord +
+      zCoord +
+      '  1.00  0.00          ' +
+      pdbElement +
+      '  '
+    );
+  }
+
+  async addStructure(filename: string) {
+    if (!filename) {
+      return;
+    }
     this.updateDatasource();
     this.stage.getComponentsByName('structure1').forEach((element: any) => {
       this.stage.removeComponent(element);
     });
-    this.stage
-      .loadFile('data://' + filename, { name: 'structure1' })
-      .then((o: any) => {
-        o.addRepresentation('ball+stick');
-        o.autoView();
-      });
+
+    try {
+      const extension = this.getFileExtension(filename);
+      const loadOptions: any = { name: 'structure1' };
+      const structureSource =
+        extension === 'xyz'
+          ? await this.loadXyzAsPdb(filename)
+          : 'data://' + filename;
+      if (extension === 'xyz') {
+        loadOptions.ext = 'pdb';
+      }
+
+      this.stage
+        .loadFile(structureSource, loadOptions)
+        .then((o: any) => {
+          o.addRepresentation('ball+stick');
+          o.autoView();
+        })
+        .catch((error: any) => {
+          console.error('Error loading structure file:', error);
+        });
+    } catch (error) {
+      console.error('Error loading structure file:', error);
+    }
   }
 
   addIsosurface(filename: string) {
@@ -365,19 +500,19 @@ export class CounterWidget extends ReactWidget {
                 <Box mb={1.5}>
                   <Inputs
                     getFiles={this.getFileList}
-                    types={['sdf', 'cif']}
+                    types={STRUCTURE_FILE_TYPES}
                     factory={this.browserFactory}
                     label="Structure"
-                    options={this.getFileList(['sdf', 'cif'])}
+                    options={this.getFileList(STRUCTURE_FILE_TYPES)}
                     inputHandler={this.addStructure}
                   />
                 </Box>
                 <Inputs
                   getFiles={this.getFileList}
-                  types={['cube']}
+                  types={ISOSURFACE_FILE_TYPES}
                   factory={this.browserFactory}
                   label="Isosurface"
-                  options={this.getFileList(['cube'])}
+                  options={this.getFileList(ISOSURFACE_FILE_TYPES)}
                   inputHandler={this.addIsosurface}
                 />
               </Paper>
