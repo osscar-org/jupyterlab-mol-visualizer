@@ -12,7 +12,7 @@ The icon of the extension (bundled as `style/molecule.svg`) is adapted from SVG 
 
 - **Large interactive viewer** — the molecular visualization fills the available screen space with a sidebar
   control panel
-- **Structure & isosurface loading** — load `.sdf`, `.cif` (structure) and `.cube` (Gaussian cube) files
+- **Structure & isosurface loading** — load `.sdf`, `.cif`, `.xyz` (structure) and `.cube` (Gaussian cube) files
   from the current JupyterLab directory
 - **Auto-rotate, visibility toggles** — toggle spin, show/hide structure and positive/negative isosurfaces
 - **Opacity & isovalue sliders** — fine-tune the display with real-time sliders
