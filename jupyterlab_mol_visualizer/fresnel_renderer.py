@@ -77,8 +77,8 @@ class CubeData:
 
 
 def render_molecular_orbital(
-    structure_path: str,
-    cube_path: str,
+    structure_path: str | None,
+    cube_path: str | None,
     *,
     isovalue: float = 0.01,
     opacity: float = 0.68,
@@ -89,6 +89,9 @@ def render_molecular_orbital(
     camera: dict[str, Any] | None = None,
     atom_material: str = "glossy",
     isosurface_material: str = "glass",
+    render_structure: bool = True,
+    render_positive_isosurface: bool = True,
+    render_negative_isosurface: bool = True,
 ) -> dict[str, str]:
     """Render a structure and positive/negative cube isosurfaces to PNG."""
 
@@ -121,59 +124,81 @@ def render_molecular_orbital(
             "does not provide the ray tracing API used here."
         )
 
-    structure = read_structure(Path(structure_path), np)
-    cube = read_cube(Path(cube_path), np, structure)
+    render_isosurface = render_positive_isosurface or render_negative_isosurface
+    if not render_structure and not render_isosurface:
+        raise ValueError("Enable structure or isosurface before ray tracing")
+
+    structure = read_structure(Path(structure_path), np) if structure_path else None
+    cube = read_cube(Path(cube_path), np, structure) if cube_path else None
+    if render_structure and structure is None:
+        raise ValueError("A structure file is required to render the structure")
+    if render_isosurface and cube is None:
+        raise ValueError("A cube file is required to render isosurfaces")
 
     if camera and isinstance(camera.get("rotation"), list):
         rotation = quaternion_to_matrix(camera["rotation"], np)
         # NGL and Fresnel use opposite screen handedness here; a 180 degree
         # vertical-axis correction preserves depth, unlike mirroring the PNG.
         rotation = vertical_axis_correction(np) @ rotation
-        center = structure.positions.mean(axis=0)
-        structure.positions = rotate_points(structure.positions, rotation, center)
-        cube.origin = rotate_points(cube.origin.reshape((1, 3)), rotation, center)[0]
-        cube.axes = cube.axes @ rotation.T
-        if len(cube.atom_positions):
-            cube.atom_positions = rotate_points(cube.atom_positions, rotation, center)
+        center = rotation_center(structure, cube, np)
+        if structure is not None:
+            structure.positions = rotate_points(structure.positions, rotation, center)
+        if cube is not None:
+            cube.origin = rotate_points(cube.origin.reshape((1, 3)), rotation, center)[0]
+            cube.axes = cube.axes @ rotation.T
+            if len(cube.atom_positions):
+                cube.atom_positions = rotate_points(cube.atom_positions, rotation, center)
 
     scene = fresnel.Scene()
     bg = parse_color(background_color, np)
     scene.background_color = bg
 
-    add_isosurface(
-        scene,
-        fresnel,
-        measure,
-        np,
-        cube,
-        abs(isovalue),
-        (0.1, 0.25, 0.95),
-        opacity,
-        isosurface_material,
-    )
-    add_isosurface(
-        scene,
-        fresnel,
-        measure,
-        np,
-        cube,
-        -abs(isovalue),
-        (0.95, 0.1, 0.1),
-        opacity,
-        isosurface_material,
-    )
-    add_structure(scene, fresnel, np, structure, atom_material)
+    if render_positive_isosurface and cube is not None:
+        add_isosurface(
+            scene,
+            fresnel,
+            measure,
+            np,
+            cube,
+            abs(isovalue),
+            (0.1, 0.25, 0.95),
+            opacity,
+            isosurface_material,
+        )
+    if render_negative_isosurface and cube is not None:
+        add_isosurface(
+            scene,
+            fresnel,
+            measure,
+            np,
+            cube,
+            -abs(isovalue),
+            (0.95, 0.1, 0.1),
+            opacity,
+            isosurface_material,
+        )
+    if render_structure and structure is not None:
+        add_structure(scene, fresnel, np, structure, atom_material)
 
-    low = structure.positions.min(axis=0)
-    high = structure.positions.max(axis=0)
-    for comp in (abs(isovalue), -abs(isovalue)):
-        try:
-            verts, _ = cube_mesh(measure, np, cube, comp)
-        except ValueError:
-            continue
-        if len(verts):
-            low = np.minimum(low, verts.min(axis=0))
-            high = np.maximum(high, verts.max(axis=0))
+    low = None
+    high = None
+    if render_structure and structure is not None and len(structure.positions):
+        low, high = include_bounds(low, high, structure.positions, np)
+    if cube is not None:
+        levels = []
+        if render_positive_isosurface:
+            levels.append(abs(isovalue))
+        if render_negative_isosurface:
+            levels.append(-abs(isovalue))
+        for comp in levels:
+            try:
+                verts, _ = cube_mesh(measure, np, cube, comp)
+            except ValueError:
+                continue
+            if len(verts):
+                low, high = include_bounds(low, high, verts, np)
+    if low is None or high is None:
+        raise ValueError("No visible geometry could be rendered")
 
     center = (low + high) / 2.0
     span = high - low
@@ -200,7 +225,7 @@ def render_molecular_orbital(
     return {
         "image": base64.b64encode(buffer.getvalue()).decode("ascii"),
         "mime_type": "image/png",
-        "filename": Path(cube_path).with_suffix(".fresnel.png").name,
+        "filename": Path(cube_path or structure_path or "render.png").with_suffix(".fresnel.png").name,
     }
 
 
@@ -465,6 +490,29 @@ def vertical_axis_correction(np: Any) -> Any:
 
 def rotate_points(points: Any, rotation: Any, center: Any) -> Any:
     return center + (points - center) @ rotation.T
+
+
+def cube_grid_center(cube: CubeData, np: Any) -> Any:
+    shape = np.asarray(cube.values.shape, dtype=float)
+    return cube.origin + ((shape - 1.0) / 2.0) @ cube.axes
+
+
+def rotation_center(structure: Structure | None, cube: CubeData | None, np: Any) -> Any:
+    if structure is not None and len(structure.positions):
+        return structure.positions.mean(axis=0)
+    if cube is not None and len(cube.atom_positions):
+        return cube.atom_positions.mean(axis=0)
+    if cube is not None:
+        return cube_grid_center(cube, np)
+    return np.zeros(3, dtype=float)
+
+
+def include_bounds(low: Any | None, high: Any | None, points: Any, np: Any) -> tuple[Any, Any]:
+    point_low = points.min(axis=0)
+    point_high = points.max(axis=0)
+    if low is None or high is None:
+        return point_low, point_high
+    return np.minimum(low, point_low), np.maximum(high, point_high)
 
 
 def cube_mesh(measure: Any, np: Any, cube: CubeData, isovalue: float) -> tuple[Any, Any]:

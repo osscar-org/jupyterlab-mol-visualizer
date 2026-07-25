@@ -8,11 +8,16 @@ import Divider from '@material-ui/core/Divider';
 import { makeStyles } from '@material-ui/core/styles';
 
 interface IToggleProps {
-  clickHandler1: () => void;
-  clickHandler2: () => void;
-  clickHandler3: () => void;
-  bclick1: () => void;
-  bclick2: () => void;
+  autoRotate: boolean;
+  positiveIsosurfaceVisible: boolean;
+  negativeIsosurfaceVisible: boolean;
+  structureVisible: boolean;
+  isosurfaceVisible: boolean;
+  onAutoRotateChange: (checked: boolean) => void;
+  onPositiveIsosurfaceChange: (checked: boolean) => void;
+  onNegativeIsosurfaceChange: (checked: boolean) => void;
+  onStructureChange: (checked: boolean) => void;
+  onIsosurfaceChange: (checked: boolean) => void;
 }
 
 export default function SwitchLabels(Props: IToggleProps) {
@@ -27,50 +32,6 @@ export default function SwitchLabels(Props: IToggleProps) {
   }));
   const classes = useStyles();
 
-  const [state, setState] = React.useState({
-    checkedA: false,
-    checkedB: true,
-    checkedC: true,
-    checkedS: true,
-    checkedI: true
-  });
-
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setState({ ...state, [event.target.name]: event.target.checked });
-
-    if (event.target.name === 'checkedA') {
-      Props.clickHandler1();
-    }
-    if (event.target.name === 'checkedB') {
-      Props.clickHandler2();
-    }
-    if (event.target.name === 'checkedC') {
-      Props.clickHandler3();
-    }
-  };
-
-  const handleClick1 = (): void => {
-    Props.bclick1();
-    setState({
-      checkedA: state.checkedA,
-      checkedB: state.checkedB,
-      checkedC: state.checkedC,
-      checkedS: !state.checkedS,
-      checkedI: state.checkedI
-    });
-  };
-
-  const handleClick2 = (): void => {
-    Props.bclick2();
-    setState({
-      checkedA: state.checkedA,
-      checkedB: !state.checkedB,
-      checkedC: !state.checkedC,
-      checkedS: state.checkedS,
-      checkedI: !state.checkedI
-    });
-  };
-
   return (
     <List dense disablePadding>
       <ListItem className={classes.listItem}>
@@ -81,8 +42,8 @@ export default function SwitchLabels(Props: IToggleProps) {
         <ListItemSecondaryAction>
           <Switch
             size="small"
-            checked={state.checkedA}
-            onChange={handleChange}
+            checked={Props.autoRotate}
+            onChange={event => Props.onAutoRotateChange(event.target.checked)}
             name="checkedA"
           />
         </ListItemSecondaryAction>
@@ -96,8 +57,10 @@ export default function SwitchLabels(Props: IToggleProps) {
         <ListItemSecondaryAction>
           <Switch
             size="small"
-            checked={state.checkedB}
-            onChange={handleChange}
+            checked={Props.positiveIsosurfaceVisible}
+            onChange={event =>
+              Props.onPositiveIsosurfaceChange(event.target.checked)
+            }
             name="checkedB"
             color="primary"
           />
@@ -111,8 +74,10 @@ export default function SwitchLabels(Props: IToggleProps) {
         <ListItemSecondaryAction>
           <Switch
             size="small"
-            checked={state.checkedC}
-            onChange={handleChange}
+            checked={Props.negativeIsosurfaceVisible}
+            onChange={event =>
+              Props.onNegativeIsosurfaceChange(event.target.checked)
+            }
             name="checkedC"
             color="secondary"
           />
@@ -127,8 +92,8 @@ export default function SwitchLabels(Props: IToggleProps) {
         <ListItemSecondaryAction>
           <Switch
             size="small"
-            checked={state.checkedS}
-            onChange={handleClick1}
+            checked={Props.structureVisible}
+            onChange={event => Props.onStructureChange(event.target.checked)}
             name="checkedS"
           />
         </ListItemSecondaryAction>
@@ -141,8 +106,8 @@ export default function SwitchLabels(Props: IToggleProps) {
         <ListItemSecondaryAction>
           <Switch
             size="small"
-            checked={state.checkedI}
-            onChange={handleClick2}
+            checked={Props.isosurfaceVisible}
+            onChange={event => Props.onIsosurfaceChange(event.target.checked)}
             name="checkedI"
           />
         </ListItemSecondaryAction>

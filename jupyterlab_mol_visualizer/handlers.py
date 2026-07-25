@@ -20,10 +20,21 @@ class FresnelRenderHandler(APIHandler):
     @web.authenticated
     async def post(self) -> None:
         data = self.get_json_body() or {}
-        structure_path = self._required_path(data, "structure_path")
-        cube_path = self._required_path(data, "cube_path")
+        render_structure = self._bool(data, "render_structure", True)
+        render_positive = self._bool(data, "render_positive_isosurface", True)
+        render_negative = self._bool(data, "render_negative_isosurface", True)
+        render_isosurface = render_positive or render_negative
 
         try:
+            if not render_structure and not render_isosurface:
+                raise web.HTTPError(400, reason="Enable structure or isosurface before ray tracing")
+            structure_path = self._optional_path(data, "structure_path")
+            cube_path = self._optional_path(data, "cube_path")
+            if render_structure and structure_path is None:
+                raise web.HTTPError(400, reason="Missing required field: structure_path")
+            if render_isosurface and cube_path is None:
+                raise web.HTTPError(400, reason="Missing required field: cube_path")
+
             result = render_molecular_orbital(
                 structure_path,
                 cube_path,
@@ -36,7 +47,15 @@ class FresnelRenderHandler(APIHandler):
                 camera=data.get("camera") if isinstance(data.get("camera"), dict) else None,
                 atom_material=str(data.get("atom_material", "glossy")),
                 isosurface_material=str(data.get("isosurface_material", "glass")),
+                render_structure=render_structure,
+                render_positive_isosurface=render_positive,
+                render_negative_isosurface=render_negative,
             )
+        except web.HTTPError as exc:
+            self.set_status(exc.status_code)
+            self.set_header("Content-Type", "application/json")
+            self.finish(json.dumps({"message": exc.reason}))
+            return
         except Exception as exc:
             self.log.exception("Fresnel render failed")
             self.set_status(500)
@@ -48,12 +67,28 @@ class FresnelRenderHandler(APIHandler):
         self.finish(json.dumps(result))
 
     def _required_path(self, data: dict[str, Any], key: str) -> str:
-        value = data.get(key)
-        if not isinstance(value, str) or not value:
+        value = self._optional_path(data, key)
+        if value is None:
             raise web.HTTPError(400, reason=f"Missing required field: {key}")
+        return value
+
+    def _optional_path(self, data: dict[str, Any], key: str) -> str | None:
+        value = data.get(key)
+        if value is None or value == "":
+            return None
+        if not isinstance(value, str):
+            raise web.HTTPError(400, reason=f"Invalid field: {key}")
         if not self.contents_manager.file_exists(value):
             raise web.HTTPError(404, reason=f"File not found: {value}")
         return self._to_os_path(value)
+
+    def _bool(self, data: dict[str, Any], key: str, default: bool) -> bool:
+        value = data.get(key, default)
+        if isinstance(value, bool):
+            return value
+        if isinstance(value, str):
+            return value.lower() in {"1", "true", "yes", "on"}
+        return bool(value)
 
     def _to_os_path(self, api_path: str) -> str:
         contents_manager = self.contents_manager

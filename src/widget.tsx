@@ -102,6 +102,10 @@ export class CounterWidget extends ReactWidget {
   renderMessage: string;
   rayTraceAtomMaterial: string;
   rayTraceIsosurfaceMaterial: string;
+  isAutoRotateEnabled: boolean;
+  isStructureVisible: boolean;
+  isPositiveIsosurfaceVisible: boolean;
+  isNegativeIsosurfaceVisible: boolean;
 
   constructor(browserFactory: IDefaultFileBrowser, theme: string) {
     super();
@@ -119,6 +123,10 @@ export class CounterWidget extends ReactWidget {
     this.renderMessage = '';
     this.rayTraceAtomMaterial = 'glossy';
     this.rayTraceIsosurfaceMaterial = 'glass';
+    this.isAutoRotateEnabled = false;
+    this.isStructureVisible = true;
+    this.isPositiveIsosurfaceVisible = true;
+    this.isNegativeIsosurfaceVisible = true;
 
     this.browserFactory = browserFactory;
     this.currentDirectory = URLExt.join(
@@ -335,6 +343,7 @@ export class CounterWidget extends ReactWidget {
         .loadFile(structureSource, loadOptions)
         .then((o: any) => {
           o.addRepresentation('ball+stick');
+          o.setVisibility(this.isStructureVisible);
           o.autoView();
         })
         .catch((error: any) => {
@@ -363,7 +372,7 @@ export class CounterWidget extends ReactWidget {
       .loadFile('data://' + filename, { name: 'surface_1' })
       .then((o: any) => {
         o.addRepresentation('surface', {
-          visible: true,
+          visible: this.isPositiveIsosurfaceVisible,
           isolevelType: 'value',
           isolevel: 0.01,
           color: 'blue',
@@ -371,10 +380,7 @@ export class CounterWidget extends ReactWidget {
           opaqueBack: false
         });
 
-        o.signals.visibilityChanged.add((value: any) => {
-          console.log('visibility change to:' + value);
-        });
-
+        o.setVisibility(this.isPositiveIsosurfaceVisible);
         o.autoView();
       });
 
@@ -382,13 +388,14 @@ export class CounterWidget extends ReactWidget {
       .loadFile('data://' + filename, { name: 'surface_2' })
       .then((o: any) => {
         o.addRepresentation('surface', {
-          visible: true,
+          visible: this.isNegativeIsosurfaceVisible,
           isolevelType: 'value',
           isolevel: -0.01,
           color: 'red',
           opacity: 0.7,
           opaqueBack: false
         });
+        o.setVisibility(this.isNegativeIsosurfaceVisible);
         o.autoView();
       });
   }
@@ -405,10 +412,10 @@ export class CounterWidget extends ReactWidget {
     const c1 = this.stage.getComponentsByName('surface_1');
     const c2 = this.stage.getComponentsByName('surface_2');
     if (c1 && c1.list && c1.list[0]) {
-      c1.list[0].setVisibility(true);
+      c1.list[0].setVisibility(this.isPositiveIsosurfaceVisible);
     }
     if (c2 && c2.list && c2.list[0]) {
-      c2.list[0].setVisibility(true);
+      c2.list[0].setVisibility(this.isNegativeIsosurfaceVisible);
     }
   }
 
@@ -424,17 +431,48 @@ export class CounterWidget extends ReactWidget {
     }
   }
 
-  toggleVisibility(filename: string) {
-    const a = this.stage.getComponentsByName(filename).list[0];
-    if (a) {
-      a.setVisibility(!a.visible);
+  setComponentVisibility(filename: string, visible: boolean) {
+    if (!this.stage) {
+      return;
+    }
+    const comp = this.stage.getComponentsByName(filename);
+    if (comp && comp.list && comp.list[0]) {
+      comp.list[0].setVisibility(visible);
     }
   }
 
-  toggleSpin() {
-    if (this.stage) {
+  setAutoRotateEnabled(checked: boolean) {
+    if (this.isAutoRotateEnabled !== checked && this.stage) {
       this.stage.toggleSpin();
     }
+    this.isAutoRotateEnabled = checked;
+    this.update();
+  }
+
+  setStructureVisible(visible: boolean) {
+    this.isStructureVisible = visible;
+    this.setComponentVisibility('structure1', visible);
+    this.update();
+  }
+
+  setPositiveIsosurfaceVisible(visible: boolean) {
+    this.isPositiveIsosurfaceVisible = visible;
+    this.setComponentVisibility('surface_1', visible);
+    this.update();
+  }
+
+  setNegativeIsosurfaceVisible(visible: boolean) {
+    this.isNegativeIsosurfaceVisible = visible;
+    this.setComponentVisibility('surface_2', visible);
+    this.update();
+  }
+
+  setIsosurfaceVisible(visible: boolean) {
+    this.isPositiveIsosurfaceVisible = visible;
+    this.isNegativeIsosurfaceVisible = visible;
+    this.setComponentVisibility('surface_1', visible);
+    this.setComponentVisibility('surface_2', visible);
+    this.update();
   }
 
   toggleCameraType(event: React.ChangeEvent<HTMLInputElement>) {
@@ -503,8 +541,24 @@ export class CounterWidget extends ReactWidget {
   }
 
   async renderRayTrace(): Promise<void> {
-    if (!this.currentStructureFile || !this.currentIsosurfaceFile) {
-      this.renderMessage = 'Load a structure and cube file before ray tracing.';
+    const renderStructure = this.isStructureVisible;
+    const renderPositiveIsosurface = this.isPositiveIsosurfaceVisible;
+    const renderNegativeIsosurface = this.isNegativeIsosurfaceVisible;
+    const renderIsosurface =
+      renderPositiveIsosurface || renderNegativeIsosurface;
+
+    if (!renderStructure && !renderIsosurface) {
+      this.renderMessage = 'Enable structure or isosurface before ray tracing.';
+      this.update();
+      return;
+    }
+    if (renderStructure && !this.currentStructureFile) {
+      this.renderMessage = 'Load a structure file before ray tracing.';
+      this.update();
+      return;
+    }
+    if (renderIsosurface && !this.currentIsosurfaceFile) {
+      this.renderMessage = 'Load a cube file before ray tracing isosurfaces.';
       this.update();
       return;
     }
@@ -526,8 +580,12 @@ export class CounterWidget extends ReactWidget {
         {
           method: 'POST',
           body: JSON.stringify({
-            structure_path: this.getContentPath(this.currentStructureFile),
-            cube_path: this.getContentPath(this.currentIsosurfaceFile),
+            structure_path: this.currentStructureFile
+              ? this.getContentPath(this.currentStructureFile)
+              : undefined,
+            cube_path: this.currentIsosurfaceFile
+              ? this.getContentPath(this.currentIsosurfaceFile)
+              : undefined,
             isovalue: this.currentIsolevel,
             opacity: this.currentSurfaceOpacity,
             width: 2400,
@@ -536,7 +594,10 @@ export class CounterWidget extends ReactWidget {
             background_color: this.viewerBgColor,
             camera: this.getRayTraceCamera(),
             atom_material: this.rayTraceAtomMaterial,
-            isosurface_material: this.rayTraceIsosurfaceMaterial
+            isosurface_material: this.rayTraceIsosurfaceMaterial,
+            render_structure: renderStructure,
+            render_positive_isosurface: renderPositiveIsosurface,
+            render_negative_isosurface: renderNegativeIsosurface
           }),
           headers: {
             'Content-Type': 'application/json'
@@ -600,19 +661,8 @@ export class CounterWidget extends ReactWidget {
   }
 
   render(): JSX.Element {
-    const func1 = (): void => this.toggleSpin();
-    const func2 = (): void => this.toggleVisibility('surface_1');
-    const func3 = (): void => this.toggleVisibility('surface_2');
-
-    const bfunc1 = (): void => {
-      this.toggleVisibility('structure1');
-    };
-
-    const bfunc2 = (): void => {
-      this.toggleVisibility('surface_1');
-      this.toggleVisibility('surface_2');
-    };
-
+    const isosurfaceVisible =
+      this.isPositiveIsosurfaceVisible || this.isNegativeIsosurfaceVisible;
     const isDark = this.theme === 'dark';
 
     const muiTheme = createTheme({
@@ -746,11 +796,26 @@ export class CounterWidget extends ReactWidget {
                   Controls
                 </Typography>
                 <SwitchLabels
-                  clickHandler1={func1}
-                  clickHandler2={func2}
-                  clickHandler3={func3}
-                  bclick1={bfunc1}
-                  bclick2={bfunc2}
+                  autoRotate={this.isAutoRotateEnabled}
+                  positiveIsosurfaceVisible={this.isPositiveIsosurfaceVisible}
+                  negativeIsosurfaceVisible={this.isNegativeIsosurfaceVisible}
+                  structureVisible={this.isStructureVisible}
+                  isosurfaceVisible={isosurfaceVisible}
+                  onAutoRotateChange={checked =>
+                    this.setAutoRotateEnabled(checked)
+                  }
+                  onPositiveIsosurfaceChange={checked =>
+                    this.setPositiveIsosurfaceVisible(checked)
+                  }
+                  onNegativeIsosurfaceChange={checked =>
+                    this.setNegativeIsosurfaceVisible(checked)
+                  }
+                  onStructureChange={checked =>
+                    this.setStructureVisible(checked)
+                  }
+                  onIsosurfaceChange={checked =>
+                    this.setIsosurfaceVisible(checked)
+                  }
                 />
 
                 <Typography
