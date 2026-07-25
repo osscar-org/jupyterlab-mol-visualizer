@@ -14,9 +14,9 @@ The icon of the extension (bundled as `style/molecule.svg`) is adapted from SVG 
   control panel
 - **Structure & isosurface loading** — load `.sdf`, `.cif`, `.xyz` (structure) and `.cube` (Gaussian cube) files
   from the current JupyterLab directory
-- **Auto-rotate, visibility toggles** — toggle spin, show/hide structure and positive/negative isosurfaces
+- **Auto-rotate, visibility toggles, camera modes** — toggle spin, show/hide structure and positive/negative isosurfaces, and switch between perspective, orthographic, and stereo cameras
 - **Opacity & isovalue sliders** — fine-tune the display with real-time sliders
-- **Viewer background color picker** — choose from 8 preset background colors
+- **Viewer background color controls** — choose from 8 preset swatches or use the custom color palette picker
 - **Auto Centre** — re-centre the camera on the molecule with a smooth animation
 - **Save PNG** — export the current view as a high-resolution PNG image
 - **Dark & light theme** — adapts to JupyterLab's theme automatically

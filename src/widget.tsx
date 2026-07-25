@@ -17,6 +17,9 @@ import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
+import Radio from '@material-ui/core/Radio';
+import RadioGroup from '@material-ui/core/RadioGroup';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
 import CenterFocusStrongIcon from '@material-ui/icons/CenterFocusStrong';
 import ImageIcon from '@material-ui/icons/Image';
 import { createTheme, ThemeProvider } from '@material-ui/core/styles';
@@ -67,6 +70,7 @@ export class CounterWidget extends ReactWidget {
   theme: string;
   private _stageReady = false;
   viewerBgColor: string;
+  cameraType: string;
 
   constructor(browserFactory: IDefaultFileBrowser, theme: string) {
     super();
@@ -75,6 +79,7 @@ export class CounterWidget extends ReactWidget {
     this.uuid = _.uniqueId('ngl_');
     this.theme = theme;
     this.viewerBgColor = theme === 'light' ? 'white' : '#1a1a2e';
+    this.cameraType = 'perspective';
 
     this.browserFactory = browserFactory;
     this.currentDirectory = URLExt.join(
@@ -133,6 +138,7 @@ export class CounterWidget extends ReactWidget {
     this.updateDatasource();
 
     this.stage = new NGL.Stage(this.uuid, {
+      cameraType: this.cameraType,
       backgroundColor: this.viewerBgColor
     });
 
@@ -382,6 +388,14 @@ export class CounterWidget extends ReactWidget {
     }
   }
 
+  toggleCameraType(event: React.ChangeEvent<HTMLInputElement>) {
+    this.cameraType = event.target.value;
+    if (this.stage) {
+      this.stage.setParameters({ cameraType: this.cameraType });
+    }
+    this.update();
+  }
+
   setViewerBgColor(color: string) {
     this.viewerBgColor = color;
     if (this.stage) {
@@ -573,6 +587,46 @@ export class CounterWidget extends ReactWidget {
                   bclick1={bfunc1}
                   bclick2={bfunc2}
                 />
+
+                <Typography
+                  variant="caption"
+                  style={{
+                    color: isDark ? '#b0b0b0' : '#616161',
+                    fontWeight: 500,
+                    display: 'block',
+                    marginTop: '8px'
+                  }}
+                >
+                  Camera
+                </Typography>
+                <RadioGroup
+                  aria-label="camera"
+                  name="camera"
+                  value={this.cameraType}
+                  onChange={event => this.toggleCameraType(event)}
+                  row
+                >
+                  <FormControlLabel
+                    value="perspective"
+                    control={<Radio size="small" />}
+                    label={
+                      <span style={{ fontSize: '0.8rem' }}>Perspective</span>
+                    }
+                  />
+                  <FormControlLabel
+                    value="orthographic"
+                    control={<Radio size="small" />}
+                    label={
+                      <span style={{ fontSize: '0.8rem' }}>Orthographic</span>
+                    }
+                  />
+                  <FormControlLabel
+                    value="stereo"
+                    control={<Radio size="small" />}
+                    label={<span style={{ fontSize: '0.8rem' }}>Stereo</span>}
+                  />
+                </RadioGroup>
+
                 <Box mt={1} display="flex" justifyContent="center" gridGap={8}>
                   <Button
                     size="small"
