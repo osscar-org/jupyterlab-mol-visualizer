@@ -21,6 +21,10 @@ import Button from '@material-ui/core/Button';
 import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
+import FormControl from '@material-ui/core/FormControl';
+import InputLabel from '@material-ui/core/InputLabel';
+import Select from '@material-ui/core/Select';
+import MenuItem from '@material-ui/core/MenuItem';
 import CenterFocusStrongIcon from '@material-ui/icons/CenterFocusStrong';
 import ImageIcon from '@material-ui/icons/Image';
 import CameraAltIcon from '@material-ui/icons/CameraAlt';
@@ -31,6 +35,12 @@ import { molIcon } from './icons';
 
 const STRUCTURE_FILE_TYPES = ['sdf', 'cif', 'xyz'];
 const ISOSURFACE_FILE_TYPES = ['cube'];
+const RAY_TRACE_MATERIALS = [
+  { value: 'matte', label: 'Matte' },
+  { value: 'glossy', label: 'Glossy' },
+  { value: 'metal', label: 'Metal' },
+  { value: 'glass', label: 'Glass' }
+];
 
 interface IRayTraceResponse {
   image: string;
@@ -90,6 +100,8 @@ export class CounterWidget extends ReactWidget {
   currentSurfaceOpacity: number;
   isRenderingRayTrace: boolean;
   renderMessage: string;
+  rayTraceAtomMaterial: string;
+  rayTraceIsosurfaceMaterial: string;
 
   constructor(browserFactory: IDefaultFileBrowser, theme: string) {
     super();
@@ -105,6 +117,8 @@ export class CounterWidget extends ReactWidget {
     this.currentSurfaceOpacity = 0.7;
     this.isRenderingRayTrace = false;
     this.renderMessage = '';
+    this.rayTraceAtomMaterial = 'glossy';
+    this.rayTraceIsosurfaceMaterial = 'glass';
 
     this.browserFactory = browserFactory;
     this.currentDirectory = URLExt.join(
@@ -520,7 +534,9 @@ export class CounterWidget extends ReactWidget {
             height: 1800,
             samples: 96,
             background_color: this.viewerBgColor,
-            camera: this.getRayTraceCamera()
+            camera: this.getRayTraceCamera(),
+            atom_material: this.rayTraceAtomMaterial,
+            isosurface_material: this.rayTraceIsosurfaceMaterial
           }),
           headers: {
             'Content-Type': 'application/json'
@@ -803,24 +819,93 @@ export class CounterWidget extends ReactWidget {
                   >
                     Save PNG
                   </Button>
-                  <Button
-                    size="small"
-                    variant="outlined"
-                    color="primary"
-                    disabled={this.isRenderingRayTrace}
-                    startIcon={
-                      this.isRenderingRayTrace ? (
-                        <CircularProgress size={14} color="inherit" />
-                      ) : (
-                        <CameraAltIcon />
-                      )
-                    }
-                    onClick={() => this.renderRayTrace()}
-                    style={{ textTransform: 'none', fontSize: '0.75rem' }}
-                  >
-                    Ray Trace
-                  </Button>
                 </Box>
+              </Paper>
+
+              {/* Ray Tracing */}
+              <Paper
+                elevation={isDark ? 2 : 1}
+                style={{
+                  padding: '12px',
+                  marginBottom: '12px',
+                  backgroundColor: isDark ? '#2c2c2c' : '#ffffff'
+                }}
+              >
+                <Typography
+                  variant="overline"
+                  display="block"
+                  gutterBottom
+                  style={{
+                    color: isDark ? '#90caf9' : '#1565c0',
+                    letterSpacing: '0.5px',
+                    lineHeight: 1,
+                    fontWeight: 600
+                  }}
+                >
+                  Ray Tracing
+                </Typography>
+                <Box display="flex" gridGap={8} mb={1.5}>
+                  <FormControl variant="outlined" size="small" fullWidth>
+                    <InputLabel id="ray-trace-atom-material-label">
+                      Atoms
+                    </InputLabel>
+                    <Select
+                      labelId="ray-trace-atom-material-label"
+                      value={this.rayTraceAtomMaterial}
+                      onChange={event => {
+                        this.rayTraceAtomMaterial = event.target
+                          .value as string;
+                        this.update();
+                      }}
+                      label="Atoms"
+                    >
+                      {RAY_TRACE_MATERIALS.map(material => (
+                        <MenuItem key={material.value} value={material.value}>
+                          {material.label}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                  <FormControl variant="outlined" size="small" fullWidth>
+                    <InputLabel id="ray-trace-isosurface-material-label">
+                      Isosurfaces
+                    </InputLabel>
+                    <Select
+                      labelId="ray-trace-isosurface-material-label"
+                      value={this.rayTraceIsosurfaceMaterial}
+                      onChange={event => {
+                        this.rayTraceIsosurfaceMaterial = event.target
+                          .value as string;
+                        this.update();
+                      }}
+                      label="Isosurfaces"
+                    >
+                      {RAY_TRACE_MATERIALS.map(material => (
+                        <MenuItem key={material.value} value={material.value}>
+                          {material.label}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Box>
+                <Button
+                  fullWidth
+                  size="small"
+                  variant="contained"
+                  color="primary"
+                  disabled={this.isRenderingRayTrace}
+                  startIcon={
+                    this.isRenderingRayTrace ? (
+                      <CircularProgress size={14} color="inherit" />
+                    ) : (
+                      <CameraAltIcon />
+                    )
+                  }
+                  onClick={() => this.renderRayTrace()}
+                  style={{ textTransform: 'none', fontSize: '0.75rem' }}
+                >
+                  Ray Trace
+                </Button>
                 {this.renderMessage && (
                   <Typography
                     variant="caption"

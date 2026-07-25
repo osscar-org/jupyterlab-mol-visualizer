@@ -34,6 +34,8 @@ class FresnelRenderHandler(APIHandler):
                 samples=int(data.get("samples", 96)),
                 background_color=str(data.get("background_color", "white")),
                 camera=data.get("camera") if isinstance(data.get("camera"), dict) else None,
+                atom_material=str(data.get("atom_material", "glossy")),
+                isosurface_material=str(data.get("isosurface_material", "glass")),
             )
         except Exception as exc:
             self.log.exception("Fresnel render failed")

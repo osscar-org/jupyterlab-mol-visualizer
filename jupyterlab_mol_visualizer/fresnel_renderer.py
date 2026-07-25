@@ -38,6 +38,14 @@ COVALENT_RADII: dict[str, float] = {
     "I": 1.39,
 }
 
+MATERIAL_PRESETS: dict[str, dict[str, float]] = {
+    "matte": {"roughness": 0.85, "specular": 0.0, "spec_trans": 0.0, "metal": 0.0},
+    "glossy": {"roughness": 0.32, "specular": 0.35, "spec_trans": 0.0, "metal": 0.0},
+    "metal": {"roughness": 0.18, "specular": 0.9, "spec_trans": 0.0, "metal": 1.0},
+    "glass": {"roughness": 0.04, "specular": 0.65, "spec_trans": 0.58, "metal": 0.0},
+}
+
+
 ATOM_RADII: dict[str, float] = {
     "H": 0.22,
     "C": 0.32,
@@ -79,6 +87,8 @@ def render_molecular_orbital(
     samples: int = 96,
     background_color: str = "white",
     camera: dict[str, Any] | None = None,
+    atom_material: str = "glossy",
+    isosurface_material: str = "glass",
 ) -> dict[str, str]:
     """Render a structure and positive/negative cube isosurfaces to PNG."""
 
@@ -130,9 +140,29 @@ def render_molecular_orbital(
     bg = parse_color(background_color, np)
     scene.background_color = bg
 
-    add_isosurface(scene, fresnel, measure, np, cube, abs(isovalue), (0.1, 0.25, 0.95), opacity)
-    add_isosurface(scene, fresnel, measure, np, cube, -abs(isovalue), (0.95, 0.1, 0.1), opacity)
-    add_structure(scene, fresnel, np, structure)
+    add_isosurface(
+        scene,
+        fresnel,
+        measure,
+        np,
+        cube,
+        abs(isovalue),
+        (0.1, 0.25, 0.95),
+        opacity,
+        isosurface_material,
+    )
+    add_isosurface(
+        scene,
+        fresnel,
+        measure,
+        np,
+        cube,
+        -abs(isovalue),
+        (0.95, 0.1, 0.1),
+        opacity,
+        isosurface_material,
+    )
+    add_structure(scene, fresnel, np, structure, atom_material)
 
     low = structure.positions.min(axis=0)
     high = structure.positions.max(axis=0)
@@ -436,6 +466,7 @@ def vertical_axis_correction(np: Any) -> Any:
 def rotate_points(points: Any, rotation: Any, center: Any) -> Any:
     return center + (points - center) @ rotation.T
 
+
 def cube_mesh(measure: Any, np: Any, cube: CubeData, isovalue: float) -> tuple[Any, Any]:
     values = cube.values
     axes = cube.axes.copy()
@@ -451,7 +482,47 @@ def cube_mesh(measure: Any, np: Any, cube: CubeData, isovalue: float) -> tuple[A
     return verts, faces.astype("uint32")
 
 
-def add_isosurface(scene: Any, fresnel: Any, measure: Any, np: Any, cube: CubeData, isovalue: float, color: tuple[float, float, float], opacity: float) -> None:
+def material_preset(material_name: str) -> dict[str, float]:
+    return MATERIAL_PRESETS.get(material_name.lower(), MATERIAL_PRESETS["glossy"])
+
+
+def make_material(
+    fresnel: Any,
+    color: tuple[float, float, float],
+    material_name: str,
+    *,
+    opacity: float = 1.0,
+    primitive_color_mix: float = 0.0,
+) -> Any:
+    preset = material_preset(material_name)
+    material = fresnel.material.Material(
+        color=color,
+        roughness=preset["roughness"],
+        primitive_color_mix=primitive_color_mix,
+    )
+    if hasattr(material, "specular"):
+        material.specular = preset["specular"]
+    if hasattr(material, "spec_trans"):
+        material.spec_trans = max(
+            preset["spec_trans"],
+            max(0.0, min(1.0 - float(opacity), 0.95)),
+        )
+    if hasattr(material, "metal"):
+        material.metal = preset["metal"]
+    return material
+
+
+def add_isosurface(
+    scene: Any,
+    fresnel: Any,
+    measure: Any,
+    np: Any,
+    cube: CubeData,
+    isovalue: float,
+    color: tuple[float, float, float],
+    opacity: float,
+    material_name: str,
+) -> None:
     try:
         verts, faces = cube_mesh(measure, np, cube, isovalue)
     except ValueError:
@@ -460,21 +531,16 @@ def add_isosurface(scene: Any, fresnel: Any, measure: Any, np: Any, cube: CubeDa
         return
     triangle_vertices = verts[faces].reshape((-1, 3)).astype("float32")
     mesh = fresnel.geometry.Mesh(scene, vertices=triangle_vertices, color=color)
-    mesh.material = fresnel.material.Material(
-        color=color,
-        roughness=0.55,
-        specular=0.15,
-        spec_trans=max(0.0, min(1.0 - float(opacity), 0.95)),
-    )
+    mesh.material = make_material(fresnel, color, material_name, opacity=opacity)
 
 
-def add_structure(scene: Any, fresnel: Any, np: Any, structure: Structure) -> None:
+def add_structure(scene: Any, fresnel: Any, np: Any, structure: Structure, material_name: str) -> None:
     if len(structure.elements) == 0:
         return
     spheres = fresnel.geometry.Sphere(scene, N=len(structure.elements))
     spheres.position[:] = structure.positions
     spheres.radius[:] = [ATOM_RADII.get(element, 0.32) for element in structure.elements]
-    spheres.material = fresnel.material.Material(color=(1, 1, 1), roughness=0.45, primitive_color_mix=1.0)
+    spheres.material = make_material(fresnel, (1, 1, 1), material_name, primitive_color_mix=1.0)
     spheres.color[:] = [ELEMENT_COLORS.get(element, (0.55, 0.55, 0.55)) for element in structure.elements]
     spheres.outline_width = 0.025
 
@@ -482,7 +548,7 @@ def add_structure(scene: Any, fresnel: Any, np: Any, structure: Structure) -> No
         cylinders = fresnel.geometry.Cylinder(scene, N=len(structure.bonds))
         cylinders.points[:] = [[structure.positions[i], structure.positions[j]] for i, j in structure.bonds]
         cylinders.radius[:] = [0.075 for _ in structure.bonds]
-        cylinders.material = fresnel.material.Material(color=(0.75, 0.75, 0.75), roughness=0.5)
+        cylinders.material = make_material(fresnel, (0.75, 0.75, 0.75), material_name)
 
 
 def parse_color(color: str, np: Any) -> tuple[float, float, float]:
