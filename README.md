@@ -19,6 +19,7 @@ The icon of the extension (bundled as `style/molecule.svg`) is adapted from SVG 
 - **Viewer background color controls** — choose from 8 preset swatches or use the custom color palette picker
 - **Auto Centre** — re-centre the camera on the molecule with a smooth animation
 - **Save PNG** — export the current view as a high-resolution PNG image
+- **Ray Trace** — render a high-resolution Fresnel image of the structure with positive and negative molecular orbital isosurfaces
 - **Dark & light theme** — adapts to JupyterLab's theme automatically
 
 ## Try it with Binder
@@ -28,6 +29,15 @@ The icon of the extension (bundled as `style/molecule.svg`) is adapted from SVG 
 ## Requirements
 
 - JupyterLab >= 4.0.0
+
+The optional Ray Trace button requires the Glotzer Fresnel path tracer from conda-forge and Python mesh/image helpers:
+
+```bash
+mamba install -c conda-forge fresnel
+pip install jupyterlab_mol_visualizer[render]
+```
+
+Do not install the PyPI package named `fresnel`; it is unrelated to the path tracer used by this extension.
 
 ## Install
 

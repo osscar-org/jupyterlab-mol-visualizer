@@ -26,6 +26,13 @@ dependencies = [
 ]
 dynamic = ["version", "description", "authors", "urls", "keywords"]
 
+[project.optional-dependencies]
+render = [
+    "numpy>=1.23",
+    "pillow>=9",
+    "scikit-image>=0.20",
+]
+
 [tool.hatch.version]
 source = "nodejs"
 
@@ -37,6 +44,7 @@ artifacts = ["jupyterlab_mol_visualizer/labextension"]
 exclude = [".github", "binder"]
 
 [tool.hatch.build.targets.wheel.shared-data]
+"jupyter-config/server-config/jupyterlab_mol_visualizer.json" = "etc/jupyter/jupyter_server_config.d/jupyterlab_mol_visualizer.json"
 "jupyterlab_mol_visualizer/labextension" = "share/jupyter/labextensions/jupyterlab_mol_visualizer"
 "install.json" = "share/jupyter/labextensions/jupyterlab_mol_visualizer/install.json"
 

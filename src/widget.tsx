@@ -8,6 +8,7 @@ import * as _ from 'underscore';
 
 import { IDefaultFileBrowser } from '@jupyterlab/filebrowser';
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
+import { ServerConnection } from '@jupyterlab/services';
 import { Message } from '@lumino/messaging';
 
 import VerticalSlider from './sliders';
@@ -22,12 +23,24 @@ import RadioGroup from '@material-ui/core/RadioGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import CenterFocusStrongIcon from '@material-ui/icons/CenterFocusStrong';
 import ImageIcon from '@material-ui/icons/Image';
+import CameraAltIcon from '@material-ui/icons/CameraAlt';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import { createTheme, ThemeProvider } from '@material-ui/core/styles';
 import { toArray, map } from '@lumino/algorithm';
 import { molIcon } from './icons';
 
 const STRUCTURE_FILE_TYPES = ['sdf', 'cif', 'xyz'];
 const ISOSURFACE_FILE_TYPES = ['cube'];
+
+interface IRayTraceResponse {
+  image: string;
+  mime_type: string;
+  filename: string;
+}
+
+interface IRayTraceCamera {
+  rotation: number[];
+}
 
 function colorInputValue(color: string): string {
   const normalized = color.toLowerCase();
@@ -71,6 +84,12 @@ export class CounterWidget extends ReactWidget {
   private _stageReady = false;
   viewerBgColor: string;
   cameraType: string;
+  currentStructureFile: string;
+  currentIsosurfaceFile: string;
+  currentIsolevel: number;
+  currentSurfaceOpacity: number;
+  isRenderingRayTrace: boolean;
+  renderMessage: string;
 
   constructor(browserFactory: IDefaultFileBrowser, theme: string) {
     super();
@@ -80,6 +99,12 @@ export class CounterWidget extends ReactWidget {
     this.theme = theme;
     this.viewerBgColor = theme === 'light' ? 'white' : '#1a1a2e';
     this.cameraType = 'perspective';
+    this.currentStructureFile = '';
+    this.currentIsosurfaceFile = '';
+    this.currentIsolevel = 0.01;
+    this.currentSurfaceOpacity = 0.7;
+    this.isRenderingRayTrace = false;
+    this.renderMessage = '';
 
     this.browserFactory = browserFactory;
     this.currentDirectory = URLExt.join(
@@ -92,6 +117,7 @@ export class CounterWidget extends ReactWidget {
     this.getCurrentDirectory = this.getCurrentDirectory.bind(this);
     this.updateDatasource = this.updateDatasource.bind(this);
     this.getFileList = this.getFileList.bind(this);
+    this.renderRayTrace = this.renderRayTrace.bind(this);
   }
 
   /**
@@ -274,6 +300,7 @@ export class CounterWidget extends ReactWidget {
     if (!filename) {
       return;
     }
+    this.currentStructureFile = filename;
     this.updateDatasource();
     this.stage.getComponentsByName('structure1').forEach((element: any) => {
       this.stage.removeComponent(element);
@@ -305,6 +332,10 @@ export class CounterWidget extends ReactWidget {
   }
 
   addIsosurface(filename: string) {
+    if (!filename) {
+      return;
+    }
+    this.currentIsosurfaceFile = filename;
     this.updateDatasource();
     this.stage.getComponentsByName('surface_1').forEach((element: any) => {
       this.stage.removeComponent(element);
@@ -349,6 +380,7 @@ export class CounterWidget extends ReactWidget {
   }
 
   updateIsosurface(e: number) {
+    this.currentSurfaceOpacity = e;
     if (!this.stage) {
       return;
     }
@@ -367,6 +399,9 @@ export class CounterWidget extends ReactWidget {
   }
 
   updateIsolevel(e: number, filename: string) {
+    if (filename === 'surface_1') {
+      this.currentIsolevel = Math.abs(e);
+    }
     const comp = this.stage.getComponentsByName(filename);
     if (comp && comp.list && comp.list[0]) {
       comp.list[0].eachRepresentation((reprElem: any) => {
@@ -432,6 +467,120 @@ export class CounterWidget extends ReactWidget {
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
       });
+  }
+
+  getContentPath(filename: string): string {
+    return URLExt.join(this.browserFactory?.model.path || '', filename);
+  }
+
+  getRayTraceCamera(): IRayTraceCamera | null {
+    if (!this.stage || !this.stage.viewerControls) {
+      return null;
+    }
+
+    const rotation = this.stage.viewerControls.rotation;
+    if (!rotation) {
+      return null;
+    }
+
+    return {
+      rotation: [rotation.x, rotation.y, rotation.z, rotation.w]
+    };
+  }
+
+  async renderRayTrace(): Promise<void> {
+    if (!this.currentStructureFile || !this.currentIsosurfaceFile) {
+      this.renderMessage = 'Load a structure and cube file before ray tracing.';
+      this.update();
+      return;
+    }
+
+    this.isRenderingRayTrace = true;
+    this.renderMessage = 'Rendering high-resolution Fresnel image...';
+    this.update();
+
+    const settings = ServerConnection.makeSettings();
+    const requestUrl = URLExt.join(
+      settings.baseUrl,
+      'jupyterlab_mol_visualizer',
+      'render'
+    );
+
+    try {
+      const response = await ServerConnection.makeRequest(
+        requestUrl,
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            structure_path: this.getContentPath(this.currentStructureFile),
+            cube_path: this.getContentPath(this.currentIsosurfaceFile),
+            isovalue: this.currentIsolevel,
+            opacity: this.currentSurfaceOpacity,
+            width: 2400,
+            height: 1800,
+            samples: 96,
+            background_color: this.viewerBgColor,
+            camera: this.getRayTraceCamera()
+          }),
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        },
+        settings
+      );
+
+      const responseText = await response.text();
+      let data: Partial<IRayTraceResponse> & {
+        message?: string;
+        reason?: string;
+      } = {};
+      if (responseText) {
+        try {
+          data = JSON.parse(responseText) as IRayTraceResponse;
+        } catch (error) {
+          data = { message: responseText };
+        }
+      }
+
+      if (!response.ok) {
+        throw new Error(
+          data.message ||
+            data.reason ||
+            response.statusText ||
+            'Ray tracing failed'
+        );
+      }
+      if (!data.image || !data.filename) {
+        throw new Error('Ray tracing response did not include an image.');
+      }
+
+      this.downloadBase64Png(data.image, data.filename);
+      this.renderMessage = 'Fresnel render saved.';
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      console.error('Error rendering Fresnel image:', error);
+      this.renderMessage = message;
+    } finally {
+      this.isRenderingRayTrace = false;
+      this.update();
+    }
+  }
+
+  downloadBase64Png(image: string, filename: string): void {
+    const binary = atob(image);
+    const bytes = new Uint8Array(binary.length);
+    for (let index = 0; index < binary.length; index++) {
+      bytes[index] = binary.charCodeAt(index);
+    }
+    const blob = new Blob([bytes], { type: 'image/png' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   }
 
   render(): JSX.Element {
@@ -627,7 +776,13 @@ export class CounterWidget extends ReactWidget {
                   />
                 </RadioGroup>
 
-                <Box mt={1} display="flex" justifyContent="center" gridGap={8}>
+                <Box
+                  mt={1}
+                  display="flex"
+                  justifyContent="center"
+                  gridGap={8}
+                  flexWrap="wrap"
+                >
                   <Button
                     size="small"
                     variant="outlined"
@@ -648,7 +803,37 @@ export class CounterWidget extends ReactWidget {
                   >
                     Save PNG
                   </Button>
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    color="primary"
+                    disabled={this.isRenderingRayTrace}
+                    startIcon={
+                      this.isRenderingRayTrace ? (
+                        <CircularProgress size={14} color="inherit" />
+                      ) : (
+                        <CameraAltIcon />
+                      )
+                    }
+                    onClick={() => this.renderRayTrace()}
+                    style={{ textTransform: 'none', fontSize: '0.75rem' }}
+                  >
+                    Ray Trace
+                  </Button>
                 </Box>
+                {this.renderMessage && (
+                  <Typography
+                    variant="caption"
+                    style={{
+                      color: isDark ? '#b0b0b0' : '#616161',
+                      display: 'block',
+                      marginTop: '8px',
+                      wordBreak: 'break-word'
+                    }}
+                  >
+                    {this.renderMessage}
+                  </Typography>
+                )}
               </Paper>
 
               {/* Sliders */}
