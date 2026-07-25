@@ -26,6 +26,32 @@ import { molIcon } from './icons';
 const STRUCTURE_FILE_TYPES = ['sdf', 'cif', 'xyz'];
 const ISOSURFACE_FILE_TYPES = ['cube'];
 
+function colorInputValue(color: string): string {
+  const normalized = color.toLowerCase();
+  const namedColors: { [key: string]: string } = {
+    white: '#ffffff',
+    black: '#000000'
+  };
+  if (namedColors[normalized]) {
+    return namedColors[normalized];
+  }
+  if (normalized.length === 7 && normalized.charAt(0) === '#') {
+    return normalized;
+  }
+  if (normalized.length === 4 && normalized.charAt(0) === '#') {
+    return (
+      '#' +
+      normalized.charAt(1) +
+      normalized.charAt(1) +
+      normalized.charAt(2) +
+      normalized.charAt(2) +
+      normalized.charAt(3) +
+      normalized.charAt(3)
+    );
+  }
+  return '#ffffff';
+}
+
 /**
  * A Counter Lumino Widget that wraps a CounterComponent.
  */
@@ -361,6 +387,7 @@ export class CounterWidget extends ReactWidget {
     if (this.stage) {
       this.stage.setParameters({ backgroundColor: color });
     }
+    this.update();
   }
 
   autoCenter() {
@@ -677,6 +704,35 @@ export class CounterWidget extends ReactWidget {
                     />
                   ))}
                 </div>
+                <Box mt={1.5} display="flex" alignItems="center" gridGap={8}>
+                  <Typography
+                    variant="caption"
+                    style={{
+                      color: isDark ? '#b0b0b0' : '#616161',
+                      fontWeight: 500
+                    }}
+                  >
+                    Palette
+                  </Typography>
+                  <input
+                    aria-label="custom background color"
+                    title="Custom background color"
+                    type="color"
+                    value={colorInputValue(this.viewerBgColor)}
+                    onChange={event =>
+                      this.setViewerBgColor(event.target.value)
+                    }
+                    style={{
+                      width: '44px',
+                      height: '32px',
+                      padding: 0,
+                      border: isDark ? '1px solid #555' : '1px solid #bdbdbd',
+                      borderRadius: '4px',
+                      backgroundColor: 'transparent',
+                      cursor: 'pointer'
+                    }}
+                  />
+                </Box>
               </Paper>
 
               {/* Tip */}
