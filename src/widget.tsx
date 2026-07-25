@@ -41,6 +41,11 @@ const RAY_TRACE_MATERIALS = [
   { value: 'metal', label: 'Metal' },
   { value: 'glass', label: 'Glass' }
 ];
+const RAY_TRACE_SURFACE_QUALITIES = [
+  { value: 'standard', label: 'Standard' },
+  { value: 'smooth', label: 'Smooth' },
+  { value: 'ultra', label: 'Ultra' }
+];
 
 interface IRayTraceResponse {
   image: string;
@@ -102,6 +107,7 @@ export class CounterWidget extends ReactWidget {
   renderMessage: string;
   rayTraceAtomMaterial: string;
   rayTraceIsosurfaceMaterial: string;
+  rayTraceSurfaceQuality: string;
   isAutoRotateEnabled: boolean;
   isStructureVisible: boolean;
   isPositiveIsosurfaceVisible: boolean;
@@ -123,6 +129,7 @@ export class CounterWidget extends ReactWidget {
     this.renderMessage = '';
     this.rayTraceAtomMaterial = 'glossy';
     this.rayTraceIsosurfaceMaterial = 'glass';
+    this.rayTraceSurfaceQuality = 'smooth';
     this.isAutoRotateEnabled = false;
     this.isStructureVisible = true;
     this.isPositiveIsosurfaceVisible = true;
@@ -595,6 +602,7 @@ export class CounterWidget extends ReactWidget {
             camera: this.getRayTraceCamera(),
             atom_material: this.rayTraceAtomMaterial,
             isosurface_material: this.rayTraceIsosurfaceMaterial,
+            surface_quality: this.rayTraceSurfaceQuality,
             render_structure: renderStructure,
             render_positive_isosurface: renderPositiveIsosurface,
             render_negative_isosurface: renderNegativeIsosurface
@@ -948,6 +956,29 @@ export class CounterWidget extends ReactWidget {
                       {RAY_TRACE_MATERIALS.map(material => (
                         <MenuItem key={material.value} value={material.value}>
                           {material.label}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Box>
+                <Box mb={1.5}>
+                  <FormControl variant="outlined" size="small" fullWidth>
+                    <InputLabel id="ray-trace-surface-quality-label">
+                      Surface
+                    </InputLabel>
+                    <Select
+                      labelId="ray-trace-surface-quality-label"
+                      value={this.rayTraceSurfaceQuality}
+                      onChange={event => {
+                        this.rayTraceSurfaceQuality = event.target
+                          .value as string;
+                        this.update();
+                      }}
+                      label="Surface"
+                    >
+                      {RAY_TRACE_SURFACE_QUALITIES.map(quality => (
+                        <MenuItem key={quality.value} value={quality.value}>
+                          {quality.label}
                         </MenuItem>
                       ))}
                     </Select>

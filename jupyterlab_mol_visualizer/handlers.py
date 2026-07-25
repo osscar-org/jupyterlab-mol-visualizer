@@ -47,6 +47,7 @@ class FresnelRenderHandler(APIHandler):
                 camera=data.get("camera") if isinstance(data.get("camera"), dict) else None,
                 atom_material=str(data.get("atom_material", "glossy")),
                 isosurface_material=str(data.get("isosurface_material", "glass")),
+                surface_quality=str(data.get("surface_quality", "smooth")),
                 render_structure=render_structure,
                 render_positive_isosurface=render_positive,
                 render_negative_isosurface=render_negative,

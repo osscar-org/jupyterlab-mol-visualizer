@@ -10,6 +10,8 @@ from pathlib import Path
 from typing import Any, Iterable
 
 BOHR_TO_ANGSTROM = 0.529177210903
+MAX_SURFACE_VOXELS = 4_000_000
+SURFACE_QUALITY_FACTORS = {"standard": 1, "smooth": 2, "ultra": 3}
 
 ELEMENT_COLORS: dict[str, tuple[float, float, float]] = {
     "H": (1.0, 1.0, 1.0),
@@ -92,6 +94,7 @@ def render_molecular_orbital(
     render_structure: bool = True,
     render_positive_isosurface: bool = True,
     render_negative_isosurface: bool = True,
+    surface_quality: str = "smooth",
 ) -> dict[str, str]:
     """Render a structure and positive/negative cube isosurfaces to PNG."""
 
@@ -99,7 +102,7 @@ def render_molecular_orbital(
         import fresnel
         import numpy as np
         from PIL import Image
-        from skimage import measure
+        from skimage import measure, transform
     except ImportError as exc:
         missing = getattr(exc, "name", "render dependency")
         raise RuntimeError(
@@ -158,24 +161,28 @@ def render_molecular_orbital(
             scene,
             fresnel,
             measure,
+            transform,
             np,
             cube,
             abs(isovalue),
             (0.1, 0.25, 0.95),
             opacity,
             isosurface_material,
+            surface_quality,
         )
     if render_negative_isosurface and cube is not None:
         add_isosurface(
             scene,
             fresnel,
             measure,
+            transform,
             np,
             cube,
             -abs(isovalue),
             (0.95, 0.1, 0.1),
             opacity,
             isosurface_material,
+            surface_quality,
         )
     if render_structure and structure is not None:
         add_structure(scene, fresnel, np, structure, atom_material)
@@ -192,7 +199,7 @@ def render_molecular_orbital(
             levels.append(-abs(isovalue))
         for comp in levels:
             try:
-                verts, _ = cube_mesh(measure, np, cube, comp)
+                verts, _ = cube_mesh(measure, transform, np, cube, comp, surface_quality)
             except ValueError:
                 continue
             if len(verts):
@@ -515,17 +522,45 @@ def include_bounds(low: Any | None, high: Any | None, points: Any, np: Any) -> t
     return np.minimum(low, point_low), np.maximum(high, point_high)
 
 
-def cube_mesh(measure: Any, np: Any, cube: CubeData, isovalue: float) -> tuple[Any, Any]:
+def surface_quality_factor(surface_quality: str) -> int:
+    return SURFACE_QUALITY_FACTORS.get(surface_quality.lower(), SURFACE_QUALITY_FACTORS["smooth"])
+
+
+def resampled_cube_values(transform: Any, np: Any, cube: CubeData, surface_quality: str) -> tuple[Any, Any]:
     values = cube.values
     axes = cube.axes.copy()
-    max_voxels = 1600000
-    if values.size > max_voxels:
-        stride = int(math.ceil((values.size / max_voxels) ** (1.0 / 3.0)))
+    factor = surface_quality_factor(surface_quality)
+    if factor > 1:
+        target_shape = tuple(int((dim - 1) * factor + 1) for dim in values.shape)
+        target_voxels = math.prod(target_shape)
+        if target_voxels <= MAX_SURFACE_VOXELS:
+            values = transform.resize(
+                values,
+                target_shape,
+                order=3,
+                mode="reflect",
+                preserve_range=True,
+                anti_aliasing=False,
+            ).astype(float, copy=False)
+            axes = axes / float(factor)
+
+    if values.size > MAX_SURFACE_VOXELS:
+        stride = int(math.ceil((values.size / MAX_SURFACE_VOXELS) ** (1.0 / 3.0)))
         values = values[::stride, ::stride, ::stride]
         axes = axes * stride
+    return values, axes
+
+
+def cube_mesh(measure: Any, transform: Any, np: Any, cube: CubeData, isovalue: float, surface_quality: str) -> tuple[Any, Any]:
+    values, axes = resampled_cube_values(transform, np, cube, surface_quality)
     if isovalue <= float(values.min()) or isovalue >= float(values.max()):
         raise ValueError("isovalue outside cube data range")
-    verts, faces, _normals, _values = measure.marching_cubes(values, level=isovalue, spacing=(1.0, 1.0, 1.0))
+    verts, faces, _normals, _values = measure.marching_cubes(
+        values,
+        level=isovalue,
+        spacing=(1.0, 1.0, 1.0),
+        allow_degenerate=False,
+    )
     verts = cube.origin + verts @ axes
     return verts, faces.astype("uint32")
 
@@ -564,15 +599,17 @@ def add_isosurface(
     scene: Any,
     fresnel: Any,
     measure: Any,
+    transform: Any,
     np: Any,
     cube: CubeData,
     isovalue: float,
     color: tuple[float, float, float],
     opacity: float,
     material_name: str,
+    surface_quality: str,
 ) -> None:
     try:
-        verts, faces = cube_mesh(measure, np, cube, isovalue)
+        verts, faces = cube_mesh(measure, transform, np, cube, isovalue, surface_quality)
     except ValueError:
         return
     if len(faces) == 0:
